@@ -362,12 +362,25 @@ function setSyncStatus(s) {
   lbl.textContent=s==='ok'?'Sincronizado':s==='saving'?'Guardando…':'Sin conexión';
 }
 
+// Migra pedidos del formato viejo (producto/codigo como campos) al nuevo (array de productos)
+function migrarPedido(p) {
+  if (Array.isArray(p.productos) && p.productos.length > 0) return p;
+  const codigo = (p.codigo || '').toUpperCase();
+  const cat    = CATALOGO[codigo];
+  const nombre = p.producto || (cat ? cat.nombre : codigo) || 'Producto';
+  const precio = (cat ? cat.precio : null) || p.pago || 0;
+  return { ...p, productos: [{ codigo, nombre, precio }] };
+}
+
 function subscribeToDB() {
   if(unsubscribe) unsubscribe();
   unsubscribe=onValue(dbRef(),(snap)=>{
     const data=snap.val();
-    pedidos=data?Object.values(data):DATOS_INICIALES.map(p=>({...p}));
-    if(!data) saveAll();
+    let raw=data?Object.values(data):DATOS_INICIALES.map(p=>({...p}));
+    const migrados=raw.map(migrarPedido);
+    const necesitaMigrar=raw.some(p=>!Array.isArray(p.productos)||p.productos.length===0);
+    pedidos=migrados;
+    if(!data||necesitaMigrar) saveAll();
     nextId=Math.max(...pedidos.map(p=>p.id),0)+1;
     setSyncStatus('ok');
     document.getElementById('loading-overlay').classList.add('hidden');
