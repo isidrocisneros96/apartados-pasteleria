@@ -234,9 +234,21 @@
           <button class="btn-add-prod" onclick="addProductoToForm()">+ Agregar</button>
         </div>
         <div class="price-hint" id="price-hint"></div>
-        <div id="f-total-row" class="total-row" style="display:none">
-          <span class="total-label">Total a cobrar</span>
-          <span class="total-val" id="f-total-val">$0</span>
+        <div id="f-total-row" style="display:none; margin-top:8px; display:none; flex-direction:column; gap:8px;">
+          <div class="total-row">
+            <span class="total-label">Total de productos</span>
+            <span class="total-val" id="f-total-val" style="color:var(--text-muted)">$0</span>
+          </div>
+          <div class="total-row" style="border-top:none; padding-top:0">
+            <span class="total-label">Anticipo recibido ($)</span>
+            <input id="f-anticipo" type="number" placeholder="0.00" min="0" step="0.01"
+              style="width:130px;padding:6px 8px;border:1px solid var(--border-strong);border-radius:var(--radius);font-size:14px;font-family:DM Sans,sans-serif;background:var(--bg);color:var(--text);text-align:right"
+              oninput="actualizarRestanteForm()" />
+          </div>
+          <div class="total-row" style="background:var(--warn-light);border-radius:var(--radius);padding:8px 10px;border-top:none">
+            <span class="total-label" style="color:var(--warn-text);font-weight:600">Restante a cobrar</span>
+            <span class="total-val" id="f-restante-val">$0</span>
+          </div>
         </div>
       </div>
     </div>
@@ -304,9 +316,21 @@
           <button class="btn-add-prod" onclick="addProductoToEdit()">+ Agregar</button>
         </div>
         <div class="price-hint" id="price-hint-e"></div>
-        <div id="e-total-row" class="total-row" style="display:none">
-          <span class="total-label">Total a cobrar</span>
-          <span class="total-val" id="e-total-val">$0</span>
+        <div id="e-total-row" style="display:none; flex-direction:column; gap:8px; margin-top:4px;">
+          <div class="total-row">
+            <span class="total-label">Total de productos</span>
+            <span class="total-val" id="e-total-val" style="color:var(--text-muted)">$0</span>
+          </div>
+          <div class="total-row" style="border-top:none; padding-top:0">
+            <span class="total-label">Anticipo recibido ($)</span>
+            <input id="e-anticipo" type="number" placeholder="0.00" min="0" step="0.01"
+              style="width:130px;padding:6px 8px;border:1px solid var(--border-strong);border-radius:var(--radius);font-size:14px;font-family:DM Sans,sans-serif;background:var(--bg);color:var(--text);text-align:right"
+              oninput="actualizarRestanteEdit()" />
+          </div>
+          <div class="total-row" style="background:var(--warn-light);border-radius:var(--radius);padding:8px 10px;border-top:none">
+            <span class="total-label" style="color:var(--warn-text);font-weight:600">Restante a cobrar</span>
+            <span class="total-val" id="e-restante-val">$0</span>
+          </div>
         </div>
       </div>
     </div>
@@ -364,12 +388,22 @@ function setSyncStatus(s) {
 
 // Migra pedidos del formato viejo (producto/codigo como campos) al nuevo (array de productos)
 function migrarPedido(p) {
-  if (Array.isArray(p.productos) && p.productos.length > 0) return p;
+  if (Array.isArray(p.productos) && p.productos.length > 0) {
+    // Ensure total/anticipo fields exist even in new-format records
+    if (p.total === undefined) {
+      const tot = (p.productos||[]).reduce((s,x)=>s+(x.precio||0),0);
+      return { ...p, total: tot, anticipo: Math.max(0, tot - (p.pago||0)) };
+    }
+    return p;
+  }
   const codigo = (p.codigo || '').toUpperCase();
   const cat    = CATALOGO[codigo];
   const nombre = p.producto || (cat ? cat.nombre : codigo) || 'Producto';
-  const precio = (cat ? cat.precio : null) || p.pago || 0;
-  return { ...p, productos: [{ codigo, nombre, precio }] };
+  const precio = cat ? cat.precio : 0;
+  const pago   = p.pago || 0; // old pago = restante
+  const total  = precio || pago;
+  const anticipo = Math.max(0, total - pago);
+  return { ...p, productos: [{ codigo, nombre, precio: total }], total, anticipo, pago };
 }
 
 function subscribeToDB() {
@@ -589,11 +623,20 @@ function renderFormProductos(){
       <div class="producto-row-price">$${p.precio.toLocaleString('es-MX')}</div>
       <button class="producto-row-del" onclick="removeFormProducto(${i})">✕</button>
     </div>`).join('');
-  const tot=totalProductos(formProductos);
   const row=document.getElementById('f-total-row');
-  if(formProductos.length>0){ row.style.display='flex'; document.getElementById('f-total-val').textContent='$'+tot.toLocaleString('es-MX'); }
-  else { row.style.display='none'; }
+  if(formProductos.length>0){
+    row.style.display='flex';
+    document.getElementById('f-total-val').textContent='$'+totalProductos(formProductos).toLocaleString('es-MX');
+    actualizarRestanteForm();
+  } else { row.style.display='none'; }
 }
+
+window.actualizarRestanteForm=function(){
+  const tot=totalProductos(formProductos);
+  const ant=parseFloat(document.getElementById('f-anticipo').value)||0;
+  const rest=Math.max(0,tot-ant);
+  document.getElementById('f-restante-val').textContent='$'+rest.toLocaleString('es-MX',{minimumFractionDigits:2});
+};
 
 window.addProductoToForm=function(){
   const raw=document.getElementById('f-producto').value.trim();
@@ -613,17 +656,20 @@ window.agregarPedido=function(){
   const nombre=document.getElementById('f-nombre').value.trim();
   if(!nombre){flash('f-nombre');return;}
   if(formProductos.length===0){flash('f-producto');return;}
+  const total=totalProductos(formProductos);
+  const anticipo=parseFloat(document.getElementById('f-anticipo').value)||0;
   const p={
     id:nextId++, nombre,
     telefono:document.getElementById('f-telefono').value.trim(),
     hora:document.getElementById('f-hora').value,
     notas:document.getElementById('f-notas').value.trim(),
     productos:[...formProductos],
-    pago:totalProductos(formProductos),
+    total, anticipo,
+    pago:Math.max(0,total-anticipo),
     entregado:false
   };
   pedidos.push(p); savePedido(p);
-  ['f-nombre','f-telefono','f-hora','f-notas','f-producto'].forEach(id=>document.getElementById(id).value='');
+  ['f-nombre','f-telefono','f-hora','f-notas','f-producto','f-anticipo'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('price-hint').textContent='';
   formProductos=[]; renderFormProductos();
 };
@@ -652,11 +698,20 @@ function renderEditProductos(){
       <div class="producto-row-price">$${p.precio.toLocaleString('es-MX')}</div>
       <button class="producto-row-del" onclick="removeEditProducto(${i})">✕</button>
     </div>`).join('');
-  const tot=totalProductos(editProductos);
   const row=document.getElementById('e-total-row');
-  if(editProductos.length>0){ row.style.display='flex'; document.getElementById('e-total-val').textContent='$'+tot.toLocaleString('es-MX'); }
-  else { row.style.display='none'; }
+  if(editProductos.length>0){
+    row.style.display='flex';
+    document.getElementById('e-total-val').textContent='$'+totalProductos(editProductos).toLocaleString('es-MX');
+    actualizarRestanteEdit();
+  } else { row.style.display='none'; }
 }
+
+window.actualizarRestanteEdit=function(){
+  const tot=totalProductos(editProductos);
+  const ant=parseFloat(document.getElementById('e-anticipo').value)||0;
+  const rest=Math.max(0,tot-ant);
+  document.getElementById('e-restante-val').textContent='$'+rest.toLocaleString('es-MX',{minimumFractionDigits:2});
+};
 
 window.addProductoToEdit=function(){
   const raw=document.getElementById('e-producto').value.trim(); if(!raw) return;
@@ -676,6 +731,7 @@ window.abrirEditar=function(id){
   document.getElementById('e-telefono').value=p.telefono||'';
   document.getElementById('e-hora').value=p.hora||'';
   document.getElementById('e-notas').value=p.notas||'';
+  document.getElementById('e-anticipo').value=p.anticipo||0;
   document.getElementById('e-producto').value='';
   document.getElementById('price-hint-e').textContent='';
   renderEditProductos();
@@ -689,12 +745,15 @@ window.guardarEdicion=function(){
   const nombre=document.getElementById('e-nombre').value.trim();
   if(!nombre){flash('e-nombre');return;}
   if(editProductos.length===0){flash('e-producto');return;}
+  const total=totalProductos(editProductos);
+  const anticipo=parseFloat(document.getElementById('e-anticipo').value)||0;
   p.nombre=nombre;
   p.telefono=document.getElementById('e-telefono').value.trim();
   p.hora=document.getElementById('e-hora').value;
   p.notas=document.getElementById('e-notas').value.trim();
   p.productos=[...editProductos];
-  p.pago=totalProductos(editProductos);
+  p.total=total; p.anticipo=anticipo;
+  p.pago=Math.max(0,total-anticipo);
   savePedido(p);
   cerrarEditar();
 };
