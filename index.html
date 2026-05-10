@@ -9,185 +9,173 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #F7F5F0; --surface: #FFFFFF; --surface2: #F0EDE7;
-    --border: rgba(0,0,0,0.1); --border-strong: rgba(0,0,0,0.18);
-    --text: #1A1815; --text-muted: #6B6760; --text-faint: #A8A5A0;
-    --accent: #1A5CA8; --accent-light: #E6F1FB; --accent-text: #0C447C;
-    --danger: #C0392B; --danger-light: #FCEBEB; --danger-text: #7B1C1C;
-    --success: #2E7D32; --success-light: #EAF3DE; --success-text: #1A4D1C;
-    --warn: #B45309; --warn-light: #FAEEDA; --warn-text: #7A3A04;
-    --radius: 10px; --radius-lg: 14px;
+    --bg:#F7F5F0; --surface:#FFFFFF; --surface2:#F0EDE7;
+    --border:rgba(0,0,0,0.1); --border-strong:rgba(0,0,0,0.18);
+    --text:#1A1815; --text-muted:#6B6760; --text-faint:#A8A5A0;
+    --accent:#1A5CA8; --accent-light:#E6F1FB; --accent-text:#0C447C;
+    --danger:#C0392B; --danger-light:#FCEBEB; --danger-text:#7B1C1C;
+    --success:#2E7D32; --success-light:#EAF3DE; --success-text:#1A4D1C;
+    --warn:#B45309; --warn-light:#FAEEDA; --warn-text:#7A3A04;
+    --radius:10px; --radius-lg:14px;
   }
-  html { font-size: 16px; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  html { font-size:16px; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 
   /* TOPBAR */
-  .topbar {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 6px 1.5rem; display: flex; align-items: center;
-    justify-content: space-between; min-height: 58px;
-    position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 8px;
-  }
-  .topbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .topbar-title { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; white-space: nowrap; }
-  .title-edit-wrap { display: flex; align-items: center; gap: 5px; }
-  .title-input {
-    font-size: 13px; color: var(--text-muted); font-family: 'DM Mono', monospace;
-    border: none; background: transparent; outline: none; width: 210px;
-    border-bottom: 1.5px dashed var(--border-strong); padding: 2px 4px;
-    transition: border-color 0.15s, color 0.15s;
-  }
-  .title-input:focus { border-color: var(--accent); color: var(--text); }
-  .edit-icon { font-size: 13px; color: var(--text-faint); cursor: pointer; }
-  .topbar-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .topbar { background:var(--surface); border-bottom:1px solid var(--border); padding:6px 1.5rem; display:flex; align-items:center; justify-content:space-between; min-height:58px; position:sticky; top:0; z-index:100; flex-wrap:wrap; gap:8px; }
+  .topbar-left { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .topbar-title { font-size:17px; font-weight:600; letter-spacing:-0.02em; white-space:nowrap; }
+  .title-edit-wrap { display:flex; align-items:center; gap:5px; }
+  .title-input { font-size:13px; color:var(--text-muted); font-family:'DM Mono',monospace; border:none; background:transparent; outline:none; width:210px; border-bottom:1.5px dashed var(--border-strong); padding:2px 4px; transition:border-color 0.15s,color 0.15s; }
+  .title-input:focus { border-color:var(--accent); color:var(--text); }
+  .edit-icon { font-size:13px; color:var(--text-faint); cursor:pointer; }
+  .topbar-right { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .sync-dot { width:8px; height:8px; border-radius:50%; background:#ccc; display:inline-block; flex-shrink:0; transition:background 0.3s; }
+  .sync-dot.ok { background:var(--success); }
+  .sync-dot.saving { background:var(--warn); }
+  .sync-dot.error { background:var(--danger); }
+  .sync-label { font-size:12px; color:var(--text-faint); }
 
-  /* SYNC INDICATOR */
-  .sync-dot {
-    width: 8px; height: 8px; border-radius: 50%; background: #ccc;
-    display: inline-block; flex-shrink: 0; transition: background 0.3s;
-  }
-  .sync-dot.ok     { background: var(--success); }
-  .sync-dot.saving { background: var(--warn); }
-  .sync-dot.error  { background: var(--danger); }
-  .sync-label { font-size: 12px; color: var(--text-faint); }
+  /* LOADING */
+  .loading-overlay { position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; z-index:500; transition:opacity 0.3s; }
+  .loading-overlay.hidden { opacity:0; pointer-events:none; }
+  .spinner { width:32px; height:32px; border:3px solid var(--border-strong); border-top-color:var(--accent); border-radius:50%; animation:spin 0.7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading-text { font-size:14px; color:var(--text-muted); }
 
-  /* LOADING OVERLAY */
-  .loading-overlay {
-    position: fixed; inset: 0; background: var(--bg);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 12px; z-index: 500; transition: opacity 0.3s;
-  }
-  .loading-overlay.hidden { opacity: 0; pointer-events: none; }
-  .spinner {
-    width: 32px; height: 32px; border: 3px solid var(--border-strong);
-    border-top-color: var(--accent); border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-text { font-size: 14px; color: var(--text-muted); }
-
-  .main { max-width: 920px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+  .main { max-width:920px; margin:0 auto; padding:1.5rem 1rem 4rem; }
 
   /* STATS */
-  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.5rem; }
-  @media (max-width: 600px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px 16px; }
-  .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); margin-bottom: 5px; }
-  .stat-val { font-size: 26px; font-weight: 600; letter-spacing: -0.03em; font-family: 'DM Mono', monospace; }
-  .stat-val.red   { color: var(--danger); }
-  .stat-val.green { color: var(--success); }
-  .stat-val.money { font-size: 18px; color: var(--warn); }
+  .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:1.5rem; }
+  @media(max-width:600px){ .stats-grid { grid-template-columns:repeat(2,1fr); } }
+  .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:12px 16px; }
+  .stat-label { font-size:11px; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-muted); margin-bottom:5px; }
+  .stat-val { font-size:26px; font-weight:600; letter-spacing:-0.03em; font-family:'DM Mono',monospace; }
+  .stat-val.red { color:var(--danger); }
+  .stat-val.green { color:var(--success); }
+  .stat-val.money { font-size:18px; color:var(--warn); }
 
   /* FORM */
-  .form-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.5rem; }
-  .form-heading { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); margin-bottom: 1rem; }
-  .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-  @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
-  .fg { display: flex; flex-direction: column; gap: 4px; }
-  .fg.full  { grid-column: 1 / -1; }
-  .fg.span2 { grid-column: span 2; }
-  .fg label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
-  .fg input, .fg textarea {
-    padding: 8px 10px; border: 1px solid var(--border-strong);
-    border-radius: var(--radius); font-size: 14px;
-    font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); width: 100%;
-    transition: border-color 0.15s, box-shadow 0.15s;
-  }
-  .fg input:focus, .fg textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,92,168,0.1); }
-  .fg textarea { resize: vertical; min-height: 60px; }
-  .price-hint { font-size: 11px; color: var(--accent-text); margin-top: 3px; min-height: 16px; font-weight: 500; }
+  .form-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem; margin-bottom:1.5rem; }
+  .form-heading { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-muted); margin-bottom:1rem; }
+  .form-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  @media(max-width:600px){ .form-grid { grid-template-columns:1fr; } }
+  .fg { display:flex; flex-direction:column; gap:4px; }
+  .fg.full { grid-column:1/-1; }
+  .fg.span2 { grid-column:span 2; }
+  .fg label { font-size:12px; color:var(--text-muted); font-weight:500; }
+  .fg input, .fg textarea { padding:8px 10px; border:1px solid var(--border-strong); border-radius:var(--radius); font-size:14px; font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); width:100%; transition:border-color 0.15s,box-shadow 0.15s; }
+  .fg input:focus, .fg textarea:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(26,92,168,0.1); }
+  .fg textarea { resize:vertical; min-height:60px; }
+  .price-hint { font-size:11px; color:var(--accent-text); margin-top:3px; min-height:16px; font-weight:500; }
+
+  /* PRODUCTOS LIST in form */
+  .productos-list { display:flex; flex-direction:column; gap:8px; margin-top:4px; }
+  .producto-row { display:flex; align-items:center; gap:8px; background:var(--surface2); border-radius:var(--radius); padding:8px 10px; }
+  .producto-row-info { flex:1; min-width:0; }
+  .producto-row-name { font-size:13px; font-weight:500; color:var(--text); }
+  .producto-row-code { font-size:11px; font-family:'DM Mono',monospace; color:var(--text-faint); }
+  .producto-row-price { font-size:13px; font-family:'DM Mono',monospace; color:var(--warn); white-space:nowrap; }
+  .producto-row-del { background:none; border:none; cursor:pointer; color:var(--text-faint); font-size:16px; padding:0 2px; flex-shrink:0; transition:color 0.15s; }
+  .producto-row-del:hover { color:var(--danger); }
+  .add-producto-row { display:flex; gap:8px; align-items:flex-start; }
+  .add-producto-row .autocomplete-wrap { flex:1; }
+  .btn-add-prod { padding:8px 14px; background:var(--accent-light); color:var(--accent-text); border:1px solid var(--accent); border-radius:var(--radius); font-size:13px; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; white-space:nowrap; flex-shrink:0; transition:background 0.15s; }
+  .btn-add-prod:hover { background:var(--accent); color:white; }
+  .total-row { display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-top:1px solid var(--border); margin-top:4px; }
+  .total-label { font-size:12px; color:var(--text-muted); font-weight:500; }
+  .total-val { font-size:15px; font-family:'DM Mono',monospace; font-weight:600; color:var(--warn); }
 
   /* AUTOCOMPLETE */
-  .autocomplete-wrap { position: relative; }
-  .autocomplete-list {
-    position: absolute; top: calc(100% + 4px); left: 0; right: 0;
-    background: var(--surface); border: 1px solid var(--border-strong);
-    border-radius: var(--radius); z-index: 300; overflow: hidden;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.12); display: none;
-    max-height: 280px; overflow-y: auto;
-  }
-  .autocomplete-list.open { display: block; }
-  .ac-item {
-    padding: 9px 12px; font-size: 13px; cursor: pointer; color: var(--text);
-    transition: background 0.1s; border-bottom: 0.5px solid var(--border);
-    display: flex; justify-content: space-between; align-items: center; gap: 8px;
-  }
-  .ac-item:last-child { border-bottom: none; }
-  .ac-item:hover, .ac-item.selected { background: var(--accent-light); color: var(--accent-text); }
-  .ac-name  { flex: 1; }
-  .ac-code  { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-faint); background: var(--surface2); padding: 1px 6px; border-radius: 4px; white-space: nowrap; margin-right: 6px; }
-  .ac-price { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-muted); white-space: nowrap; }
-  .ac-item:hover .ac-code, .ac-item.selected .ac-code   { background: rgba(26,92,168,0.12); color: var(--accent-text); }
-  .ac-item:hover .ac-price, .ac-item.selected .ac-price { color: var(--accent-text); }
-  .ac-highlight { font-weight: 700; }
+  .autocomplete-wrap { position:relative; }
+  .autocomplete-list { position:absolute; top:calc(100% + 4px); left:0; right:0; background:var(--surface); border:1px solid var(--border-strong); border-radius:var(--radius); z-index:300; overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,0.12); display:none; max-height:260px; overflow-y:auto; }
+  .autocomplete-list.open { display:block; }
+  .ac-item { padding:9px 12px; font-size:13px; cursor:pointer; color:var(--text); transition:background 0.1s; border-bottom:0.5px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .ac-item:last-child { border-bottom:none; }
+  .ac-item:hover, .ac-item.selected { background:var(--accent-light); color:var(--accent-text); }
+  .ac-name { flex:1; }
+  .ac-code { font-family:'DM Mono',monospace; font-size:11px; color:var(--text-faint); background:var(--surface2); padding:1px 6px; border-radius:4px; white-space:nowrap; margin-right:6px; }
+  .ac-price { font-family:'DM Mono',monospace; font-size:12px; color:var(--text-muted); white-space:nowrap; }
+  .ac-item:hover .ac-code, .ac-item.selected .ac-code { background:rgba(26,92,168,0.12); color:var(--accent-text); }
+  .ac-item:hover .ac-price, .ac-item.selected .ac-price { color:var(--accent-text); }
+  .ac-highlight { font-weight:700; }
 
   /* BUTTONS */
-  .btn-primary {
-    padding: 9px 20px; background: var(--accent); color: white;
-    border: none; border-radius: var(--radius); font-size: 14px; font-weight: 600;
-    font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 1rem;
-    display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s;
-  }
-  .btn-primary:hover { background: #154E90; }
-  .btn-ghost {
-    padding: 8px 14px; background: transparent; color: var(--text-muted);
-    border: 1px solid var(--border-strong); border-radius: var(--radius);
-    font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.15s;
-  }
-  .btn-ghost:hover { background: var(--surface2); }
+  .btn-primary { padding:9px 20px; background:var(--accent); color:white; border:none; border-radius:var(--radius); font-size:14px; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; margin-top:1rem; display:inline-flex; align-items:center; gap:6px; transition:background 0.15s; }
+  .btn-primary:hover { background:#154E90; }
+  .btn-ghost { padding:8px 14px; background:transparent; color:var(--text-muted); border:1px solid var(--border-strong); border-radius:var(--radius); font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer; transition:background 0.15s; }
+  .btn-ghost:hover { background:var(--surface2); }
+
+  /* SEARCH */
+  .search-wrap { position:relative; margin-bottom:12px; }
+  .search-input { width:100%; padding:9px 12px 9px 36px; border:1px solid var(--border-strong); border-radius:var(--radius); font-size:14px; font-family:'DM Sans',sans-serif; background:var(--surface); color:var(--text); transition:border-color 0.15s,box-shadow 0.15s; }
+  .search-input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(26,92,168,0.1); }
+  .search-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text-faint); font-size:16px; pointer-events:none; }
+  .search-clear { position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-faint); cursor:pointer; font-size:16px; display:none; }
+  .search-clear.visible { display:block; }
 
   /* FILTERS */
-  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
-  .section-title  { font-size: 15px; font-weight: 600; }
-  .filters { display: flex; gap: 6px; flex-wrap: wrap; }
-  .filt { padding: 4px 14px; border-radius: 100px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-muted); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; font-weight: 500; }
-  .filt.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
+  .section-title { font-size:15px; font-weight:600; }
+  .filters { display:flex; gap:6px; flex-wrap:wrap; }
+  .filt { padding:4px 14px; border-radius:100px; border:1px solid var(--border-strong); background:var(--surface); color:var(--text-muted); font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.15s; font-weight:500; }
+  .filt.active { background:var(--accent); color:white; border-color:var(--accent); }
 
   /* ORDERS */
-  .orders { display: flex; flex-direction: column; gap: 9px; margin-bottom: 1.5rem; }
-  .order-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 0.9rem 1.1rem; display: flex; gap: 12px; align-items: flex-start; transition: opacity 0.2s; }
-  .order-card.done { opacity: 0.45; }
-  .chk { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border-strong); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
-  .chk.active { background: var(--success); border-color: var(--success); }
-  .chk svg { display: none; }
-  .chk.active svg { display: block; }
-  .order-body { flex: 1; min-width: 0; }
-  .order-top  { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: flex-start; }
-  .order-producto { font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
-  .order-codigo   { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-faint); background: var(--surface2); padding: 1px 6px; border-radius: 4px; margin-left: 5px; font-weight: 400; }
-  .order-card.done .order-producto { text-decoration: line-through; color: var(--text-faint); }
-  .tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 2px; }
-  .tag { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 100px; white-space: nowrap; }
-  .tag-hora   { background: var(--accent-light);   color: var(--accent-text);  }
-  .tag-pago   { background: var(--danger-light);   color: var(--danger-text);  }
-  .tag-pagado { background: var(--success-light);  color: var(--success-text); }
-  .order-info  { font-size: 13px; color: var(--text-muted); margin-top: 5px; display: flex; gap: 12px; flex-wrap: wrap; }
-  .order-notes { font-size: 12px; color: var(--text-faint); margin-top: 4px; font-style: italic; }
-  .del-btn { background: none; border: none; cursor: pointer; color: var(--text-faint); font-size: 17px; padding: 2px 4px; border-radius: 6px; transition: color 0.15s, background 0.15s; flex-shrink: 0; }
-  .del-btn:hover { color: var(--danger); background: var(--danger-light); }
+  .orders { display:flex; flex-direction:column; gap:9px; margin-bottom:1.5rem; }
+  .order-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:0.9rem 1.1rem; display:flex; gap:12px; align-items:flex-start; transition:opacity 0.2s; }
+  .order-card.done { opacity:0.45; }
+  .chk { width:28px; height:28px; border-radius:50%; border:2px solid var(--border-strong); background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.15s; }
+  .chk.active { background:var(--success); border-color:var(--success); }
+  .chk svg { display:none; }
+  .chk.active svg { display:block; }
+  .order-body { flex:1; min-width:0; }
+  .order-top { display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; align-items:flex-start; }
+  .order-nombre { font-size:15px; font-weight:600; color:var(--text); letter-spacing:-0.01em; }
+  .order-card.done .order-nombre { text-decoration:line-through; color:var(--text-faint); }
+  .tags { display:flex; gap:5px; flex-wrap:wrap; margin-top:2px; }
+  .tag { font-size:11px; font-weight:600; padding:2px 9px; border-radius:100px; white-space:nowrap; }
+  .tag-hora { background:var(--accent-light); color:var(--accent-text); }
+  .tag-pago { background:var(--danger-light); color:var(--danger-text); }
+  .tag-pagado { background:var(--success-light); color:var(--success-text); }
+  .tag-multi { background:var(--surface2); color:var(--text-muted); }
+  .order-info { font-size:13px; color:var(--text-muted); margin-top:5px; display:flex; gap:12px; flex-wrap:wrap; }
+  .order-productos-list { margin-top:8px; display:flex; flex-direction:column; gap:4px; }
+  .order-producto-item { display:flex; justify-content:space-between; align-items:center; font-size:13px; padding:5px 8px; background:var(--bg); border-radius:6px; gap:8px; }
+  .order-producto-item-name { flex:1; color:var(--text); }
+  .order-producto-item-code { font-family:'DM Mono',monospace; font-size:11px; color:var(--text-faint); background:var(--surface2); padding:1px 6px; border-radius:4px; }
+  .order-producto-item-price { font-family:'DM Mono',monospace; font-size:12px; color:var(--text-muted); white-space:nowrap; }
+  .order-notes { font-size:12px; color:var(--text-faint); margin-top:5px; font-style:italic; }
+  .order-actions { display:flex; flex-direction:column; gap:6px; align-items:flex-end; flex-shrink:0; }
+  .edit-btn { background:none; border:none; cursor:pointer; color:var(--text-faint); font-size:16px; padding:2px 4px; border-radius:6px; transition:color 0.15s,background 0.15s; }
+  .edit-btn:hover { color:var(--accent); background:var(--accent-light); }
+  .del-btn { background:none; border:none; cursor:pointer; color:var(--text-faint); font-size:16px; padding:2px 4px; border-radius:6px; transition:color 0.15s,background 0.15s; }
+  .del-btn:hover { color:var(--danger); background:var(--danger-light); }
 
   /* PENDIENTES */
-  .pendientes-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; }
-  .pendientes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 9px; margin-top: 1rem; }
-  .pchip { background: var(--bg); border-radius: var(--radius); padding: 10px 14px; border: 1px solid var(--border); }
-  .pchip-name { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; line-height: 1.3; }
-  .pchip-num  { font-size: 24px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--text); }
-  .pchip-num.cero { color: var(--success); }
+  .pendientes-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem; }
+  .pendientes-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:9px; margin-top:1rem; }
+  .pchip { background:var(--bg); border-radius:var(--radius); padding:10px 14px; border:1px solid var(--border); }
+  .pchip-name { font-size:11px; color:var(--text-muted); margin-bottom:3px; line-height:1.3; }
+  .pchip-num { font-size:24px; font-weight:600; font-family:'DM Mono',monospace; color:var(--text); }
+  .pchip-num.cero { color:var(--success); }
 
-  .empty { text-align: center; padding: 2.5rem; color: var(--text-faint); font-size: 14px; }
+  .empty { text-align:center; padding:2.5rem; color:var(--text-faint); font-size:14px; }
 
   /* MODALS */
-  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; align-items: center; justify-content: center; }
-  .modal-bg.open { display: flex; }
-  .modal { background: var(--surface); border-radius: var(--radius-lg); padding: 1.75rem; width: 90%; max-width: 400px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); }
-  .modal h3  { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-  .modal p   { font-size: 14px; color: var(--text-muted); margin-bottom: 1.25rem; }
-  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:200; align-items:flex-start; justify-content:center; padding:2rem 1rem; overflow-y:auto; }
+  .modal-bg.open { display:flex; }
+  .modal { background:var(--surface); border-radius:var(--radius-lg); padding:1.75rem; width:100%; max-width:560px; box-shadow:0 8px 32px rgba(0,0,0,0.18); margin:auto; }
+  .modal h3 { font-size:16px; font-weight:600; margin-bottom:8px; }
+  .modal p { font-size:14px; color:var(--text-muted); margin-bottom:1.25rem; }
+  .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:1.25rem; }
+  .modal-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  @media(max-width:500px){ .modal-grid { grid-template-columns:1fr; } }
+  .modal-section-title { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-muted); margin:1rem 0 8px; grid-column:1/-1; }
 </style>
 </head>
 <body>
 
-<!-- Loading overlay -->
 <div class="loading-overlay" id="loading-overlay">
   <div class="spinner"></div>
   <div class="loading-text">Conectando con Firebase…</div>
@@ -197,8 +185,7 @@
   <div class="topbar-left">
     <span class="topbar-title">Control de Apartados</span>
     <div class="title-edit-wrap">
-      <input class="title-input" id="titulo-control" type="text" value="10 de mayo de 2026"
-        oninput="guardarTitulo()" placeholder="Nombre del control…" title="Toca para editar" />
+      <input class="title-input" id="titulo-control" type="text" value="10 de mayo de 2026" oninput="guardarTitulo()" placeholder="Nombre del control…" title="Toca para editar" />
       <span class="edit-icon" onclick="document.getElementById('titulo-control').focus()">✏️</span>
     </div>
   </div>
@@ -213,22 +200,10 @@
 <div class="main">
   <div class="stats-grid" id="stats-grid"></div>
 
+  <!-- FORM: Nuevo apartado -->
   <div class="form-section">
     <div class="form-heading">+ Nuevo apartado</div>
     <div class="form-grid">
-      <div class="fg span2">
-        <label>Producto / código</label>
-        <div class="autocomplete-wrap">
-          <input id="f-producto" type="text" placeholder="Ej: ESFRME, RODA, IN150…" autocomplete="off"
-            oninput="acInput(this)" onkeydown="acKey(event)" onblur="setTimeout(()=>acClose(),160)" />
-          <div class="autocomplete-list" id="ac-list"></div>
-        </div>
-        <div class="price-hint" id="price-hint"></div>
-      </div>
-      <div class="fg">
-        <label>Hora de recolección</label>
-        <input id="f-hora" type="time" />
-      </div>
       <div class="fg span2">
         <label>Nombre del cliente</label>
         <input id="f-nombre" type="text" placeholder="Nombre completo" />
@@ -238,12 +213,31 @@
         <input id="f-telefono" type="tel" placeholder="10 dígitos" />
       </div>
       <div class="fg">
-        <label>Pago restante ($)</label>
-        <input id="f-pago" type="number" placeholder="0.00" min="0" step="0.01" />
+        <label>Hora de recolección</label>
+        <input id="f-hora" type="time" />
       </div>
       <div class="fg full">
         <label>Notas extras</label>
         <textarea id="f-notas" placeholder="Dedicatoria, sabor, alergias…"></textarea>
+      </div>
+
+      <!-- Productos -->
+      <div class="fg full">
+        <label>Productos</label>
+        <div id="f-productos-list" class="productos-list"></div>
+        <div class="add-producto-row" style="margin-top:8px">
+          <div class="autocomplete-wrap" style="flex:1">
+            <input id="f-producto" type="text" placeholder="Código o nombre del producto…" autocomplete="off"
+              oninput="acInput(this,'ac-list')" onkeydown="acKey(event,'ac-list')" onblur="setTimeout(()=>acClose('ac-list'),160)" />
+            <div class="autocomplete-list" id="ac-list"></div>
+          </div>
+          <button class="btn-add-prod" onclick="addProductoToForm()">+ Agregar</button>
+        </div>
+        <div class="price-hint" id="price-hint"></div>
+        <div id="f-total-row" class="total-row" style="display:none">
+          <span class="total-label">Total a cobrar</span>
+          <span class="total-val" id="f-total-val">$0</span>
+        </div>
       </div>
     </div>
     <button class="btn-primary" onclick="agregarPedido()">
@@ -252,8 +246,15 @@
     </button>
   </div>
 
+  <!-- SEARCH + FILTERS -->
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="search-input" type="text" placeholder="Buscar por nombre, teléfono o producto…" oninput="onSearch(this)" />
+    <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
+  </div>
+
   <div class="section-header">
-    <span class="section-title">Apartados</span>
+    <span class="section-title">Apartados <span id="count-label" style="font-weight:400;color:var(--text-faint);font-size:13px"></span></span>
     <div class="filters">
       <button class="filt active" data-f="todos"      onclick="setFiltro(this)">Todos</button>
       <button class="filt"        data-f="pendientes" onclick="setFiltro(this)">Pendientes</button>
@@ -269,6 +270,54 @@
   </div>
 </div>
 
+<!-- MODAL: Editar apartado -->
+<div class="modal-bg" id="modal-editar">
+  <div class="modal">
+    <h3>Editar apartado</h3>
+    <div class="modal-grid">
+      <div class="fg span2" style="grid-column:1/-1">
+        <label>Nombre del cliente</label>
+        <input id="e-nombre" type="text" />
+      </div>
+      <div class="fg">
+        <label>Teléfono</label>
+        <input id="e-telefono" type="tel" />
+      </div>
+      <div class="fg">
+        <label>Hora de recolección</label>
+        <input id="e-hora" type="time" />
+      </div>
+      <div class="fg" style="grid-column:1/-1">
+        <label>Notas extras</label>
+        <textarea id="e-notas"></textarea>
+      </div>
+
+      <div class="fg" style="grid-column:1/-1">
+        <label>Productos</label>
+        <div id="e-productos-list" class="productos-list" style="margin-top:4px"></div>
+        <div class="add-producto-row" style="margin-top:8px">
+          <div class="autocomplete-wrap" style="flex:1">
+            <input id="e-producto" type="text" placeholder="Agregar producto…" autocomplete="off"
+              oninput="acInput(this,'ac-list-e')" onkeydown="acKey(event,'ac-list-e')" onblur="setTimeout(()=>acClose('ac-list-e'),160)" />
+            <div class="autocomplete-list" id="ac-list-e"></div>
+          </div>
+          <button class="btn-add-prod" onclick="addProductoToEdit()">+ Agregar</button>
+        </div>
+        <div class="price-hint" id="price-hint-e"></div>
+        <div id="e-total-row" class="total-row" style="display:none">
+          <span class="total-label">Total a cobrar</span>
+          <span class="total-val" id="e-total-val">$0</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="cerrarEditar()">Cancelar</button>
+      <button class="btn-primary" style="margin-top:0" onclick="guardarEdicion()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Confirmar borrar todo -->
 <div class="modal-bg" id="modal-borrar">
   <div class="modal">
     <h3>¿Borrar todos los apartados?</h3>
@@ -280,12 +329,10 @@
   </div>
 </div>
 
-<!-- Firebase SDK -->
 <script type="module">
 import { initializeApp }                          from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// ── Firebase config ───────────────────────────────────────────────────────────
 const firebaseConfig = {
   apiKey:            "AIzaSyD6FFHq7GMe_VdAuEFzj1A1RvNQ0pVoGtY",
   authDomain:        "apartados-pasteleria.firebaseapp.com",
@@ -295,288 +342,198 @@ const firebaseConfig = {
   messagingSenderId: "725607229153",
   appId:             "1:725607229153:web:7d3b2c33eab8cb1402b9a0"
 };
-
 const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
 
-// ── Refs ──────────────────────────────────────────────────────────────────────
-// Each "event" is stored under /eventos/<titulo_slug>/
-// so different dates don't overwrite each other.
 function slugTitulo() {
-  return (document.getElementById('titulo-control').value || 'control')
-    .toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+  return (document.getElementById('titulo-control').value||'control').toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
 }
-function dbRef()       { return ref(db, `eventos/${slugTitulo()}/pedidos`); }
-function dbTituloRef() { return ref(db, `eventos/${slugTitulo()}/titulo`);  }
+function dbRef()  { return ref(db,`eventos/${slugTitulo()}/pedidos`); }
 
-// ── State ─────────────────────────────────────────────────────────────────────
-let pedidos   = [];
-let nextId    = 1;
-let filtro    = 'todos';
-let unsubscribe = null;
+let pedidos=[], nextId=1, filtro='todos', busqueda='', unsubscribe=null;
+let formProductos=[];   // productos en el form de nuevo apartado
+let editProductos=[];   // productos en el modal de edición
+let editId=null;
 
-// ── Sync status ───────────────────────────────────────────────────────────────
-function setSyncStatus(status) {
-  const dot   = document.getElementById('sync-dot');
-  const label = document.getElementById('sync-label');
-  dot.className = 'sync-dot ' + status;
-  label.textContent = status === 'ok' ? 'Sincronizado' : status === 'saving' ? 'Guardando…' : 'Sin conexión';
+// ── SYNC ──────────────────────────────────────────────────────────────────────
+function setSyncStatus(s) {
+  const dot=document.getElementById('sync-dot'), lbl=document.getElementById('sync-label');
+  dot.className='sync-dot '+s;
+  lbl.textContent=s==='ok'?'Sincronizado':s==='saving'?'Guardando…':'Sin conexión';
 }
 
-// ── Listen to Firebase ────────────────────────────────────────────────────────
 function subscribeToDB() {
-  if (unsubscribe) unsubscribe();
-  unsubscribe = onValue(dbRef(), (snapshot) => {
-    const data = snapshot.val();
-    pedidos = data ? Object.values(data) : DATOS_INICIALES.map(p => ({...p}));
-    // If DB was empty, seed it
-    if (!data) saveAll();
-    nextId = Math.max(...pedidos.map(p => p.id), 0) + 1;
+  if(unsubscribe) unsubscribe();
+  unsubscribe=onValue(dbRef(),(snap)=>{
+    const data=snap.val();
+    pedidos=data?Object.values(data):DATOS_INICIALES.map(p=>({...p}));
+    if(!data) saveAll();
+    nextId=Math.max(...pedidos.map(p=>p.id),0)+1;
     setSyncStatus('ok');
     document.getElementById('loading-overlay').classList.add('hidden');
     renderAll();
-  }, (error) => {
-    console.error(error);
-    setSyncStatus('error');
-    document.getElementById('loading-overlay').classList.add('hidden');
-  });
+  },(err)=>{ console.error(err); setSyncStatus('error'); document.getElementById('loading-overlay').classList.add('hidden'); });
 }
 
-// ── Save helpers ──────────────────────────────────────────────────────────────
 function saveAll() {
   setSyncStatus('saving');
-  const obj = {};
-  pedidos.forEach(p => { obj['p' + p.id] = p; });
-  set(dbRef(), obj).then(() => setSyncStatus('ok')).catch(() => setSyncStatus('error'));
+  const obj={}; pedidos.forEach(p=>{ obj['p'+p.id]=p; });
+  set(dbRef(),obj).then(()=>setSyncStatus('ok')).catch(()=>setSyncStatus('error'));
 }
-
 function savePedido(p) {
   setSyncStatus('saving');
-  set(ref(db, `eventos/${slugTitulo()}/pedidos/p${p.id}`), p)
-    .then(() => setSyncStatus('ok')).catch(() => setSyncStatus('error'));
+  set(ref(db,`eventos/${slugTitulo()}/pedidos/p${p.id}`),p).then(()=>setSyncStatus('ok')).catch(()=>setSyncStatus('error'));
 }
-
 function deletePedido(id) {
   setSyncStatus('saving');
-  remove(ref(db, `eventos/${slugTitulo()}/pedidos/p${id}`))
-    .then(() => setSyncStatus('ok')).catch(() => setSyncStatus('error'));
+  remove(ref(db,`eventos/${slugTitulo()}/pedidos/p${id}`)).then(()=>setSyncStatus('ok')).catch(()=>setSyncStatus('error'));
 }
 
-// ── Title ─────────────────────────────────────────────────────────────────────
-window.guardarTitulo = function() {
-  const val = document.getElementById('titulo-control').value;
-  localStorage.setItem('apartados_titulo_v1', val);
-  // Re-subscribe to new path when title changes
-  subscribeToDB();
-};
-
-// Load saved title
-const savedTitulo = localStorage.getItem('apartados_titulo_v1');
-if (savedTitulo) document.getElementById('titulo-control').value = savedTitulo;
+// ── TITLE ─────────────────────────────────────────────────────────────────────
+window.guardarTitulo=function(){ localStorage.setItem('apartados_titulo_v1',document.getElementById('titulo-control').value); subscribeToDB(); };
+const savedTitulo=localStorage.getItem('apartados_titulo_v1');
+if(savedTitulo) document.getElementById('titulo-control').value=savedTitulo;
 
 // ── CATÁLOGO ──────────────────────────────────────────────────────────────────
 const CATALOGO = {
-  'ESFRCH': { nombre:'Espuma de Fresa Chico',          precio:475  },
-  'ESFRME': { nombre:'Espuma de Fresa Mediano',         precio:585  },
-  'ESFRGR': { nombre:'Espuma de Fresa Grande',          precio:925  },
-  'ESFR45': { nombre:'Espuma de Fresa Extra 45p',       precio:1640 },
-  'ESDUCH': { nombre:'Espuma de Durazno Chico',         precio:450  },
-  'ESDUME': { nombre:'Espuma de Durazno Mediano',       precio:575  },
-  'ESDUGR': { nombre:'Espuma de Durazno Grande',        precio:900  },
-  'ESDU45': { nombre:'Espuma de Durazno Extra 45p',     precio:1580 },
-  'ESMACH': { nombre:'Espuma de Mango Chico',           precio:450  },
-  'ESMAME': { nombre:'Espuma de Mango Mediano',         precio:575  },
-  'ESMAGR': { nombre:'Espuma de Mango Grande',          precio:900  },
-  'ESMA45': { nombre:'Espuma de Mango Extra 45p',       precio:1580 },
-  'ESIN':   { nombre:'Espuma Individual',               precio:75   },
-  'BERCH':  { nombre:'Berlinés Chico',                  precio:345  },
-  'BERME':  { nombre:'Berlinés Mediano',                precio:495  },
-  'BERGR':  { nombre:'Berlinés Grande',                 precio:770  },
-  'BER45':  { nombre:'Berlinés Extra 45p',              precio:1115 },
-  'BER60':  { nombre:'Berlinés Extra 60p',              precio:1345 },
-  'BER75':  { nombre:'Berlinés Extra 75p',              precio:1630 },
-  'BER100': { nombre:'Berlinés Extra 100p',             precio:2240 },
-  'BER150': { nombre:'Berlinés Extra 150p',             precio:3285 },
-  'CACH':   { nombre:'Catalán de Yema Chico',           precio:440  },
-  'CAME':   { nombre:'Catalán de Yema Mediano',         precio:565  },
-  'CAGR':   { nombre:'Catalán de Yema Grande',          precio:910  },
-  'CA45':   { nombre:'Catalán de Yema Extra 45p',       precio:1345 },
-  'CA60':   { nombre:'Catalán de Yema Extra 60p',       precio:1595 },
-  'CA75':   { nombre:'Catalán de Yema Extra 75p',       precio:1960 },
-  'CA100':  { nombre:'Catalán de Yema Extra 100p',      precio:2520 },
-  'CA150':  { nombre:'Catalán de Yema Extra 150p',      precio:3600 },
-  'INCH':   { nombre:'Inglés de Chocolate Chico',       precio:440  },
-  'INME':   { nombre:'Inglés de Chocolate Mediano',     precio:565  },
-  'INGR':   { nombre:'Inglés de Chocolate Grande',      precio:910  },
-  'IN45':   { nombre:'Inglés de Chocolate Extra 45p',   precio:1345 },
-  'IN60':   { nombre:'Inglés de Chocolate Extra 60p',   precio:1595 },
-  'IN75':   { nombre:'Inglés de Chocolate Extra 75p',   precio:1960 },
-  'IN100':  { nombre:'Inglés de Chocolate Extra 100p',  precio:2520 },
-  'IN150':  { nombre:'Inglés de Chocolate Extra 150p',  precio:3600 },
-  'GECH':   { nombre:'German de Coco Chico',            precio:460  },
-  'GEME':   { nombre:'German de Coco Mediano',          precio:585  },
-  'GEGR':   { nombre:'German de Coco Grande',           precio:965  },
-  'GE45':   { nombre:'German de Coco Extra 45p',        precio:1395 },
-  'GE60':   { nombre:'German de Coco Extra 60p',        precio:1645 },
-  'GE75':   { nombre:'German de Coco Extra 75p',        precio:2010 },
-  'GE100':  { nombre:'German de Coco Extra 100p',       precio:2570 },
-  'GE150':  { nombre:'German de Coco Extra 150p',       precio:3650 },
-  'MOCH':   { nombre:'Moka Austriaco Chico',            precio:460  },
-  'MOME':   { nombre:'Moka Austriaco Mediano',          precio:585  },
-  'MOGR':   { nombre:'Moka Austriaco Grande',           precio:965  },
-  'MO45':   { nombre:'Moka Austriaco Extra 45p',        precio:1395 },
-  'MO60':   { nombre:'Moka Austriaco Extra 60p',        precio:1645 },
-  'MO75':   { nombre:'Moka Austriaco Extra 75p',        precio:2010 },
-  'MO100':  { nombre:'Moka Austriaco Extra 100p',       precio:2570 },
-  'MO150':  { nombre:'Moka Austriaco Extra 150p',       precio:3650 },
-  'PICH':   { nombre:'Piñón Chico',                     precio:485  },
-  'PIME':   { nombre:'Piñón Mediano',                   precio:605  },
-  'PIGR':   { nombre:'Piñón Grande',                    precio:985  },
-  'PI45':   { nombre:'Piñón Extra 45p',                 precio:1405 },
-  'PI60':   { nombre:'Piñón Extra 60p',                 precio:1665 },
-  'PI75':   { nombre:'Piñón Extra 75p',                 precio:2030 },
-  'PI100':  { nombre:'Piñón Extra 100p',                precio:2590 },
-  'PI150':  { nombre:'Piñón Extra 150p',                precio:3670 },
-  'ZACH':   { nombre:'Queso con Zarzamora Chico',       precio:550  },
-  'ZAME':   { nombre:'Queso con Zarzamora Mediano',     precio:765  },
-  'ZAGR':   { nombre:'Queso con Zarzamora Grande',      precio:1105 },
-  'ZA45':   { nombre:'Queso con Zarzamora Extra 45p',   precio:1705 },
-  'QFCH':   { nombre:'Queso con Fresa Chico',           precio:550  },
-  'QFME':   { nombre:'Queso con Fresa Mediano',         precio:765  },
-  'QFGR':   { nombre:'Queso con Fresa Grande',          precio:1105 },
-  'QF45':   { nombre:'Queso con Fresa Extra 45p',       precio:1705 },
-  'ZUFR':   { nombre:'Zurich Fresa (Mediano)',           precio:545  },
-  'SACH':   { nombre:'Sacher Chico',                    precio:365  },
-  'SAME':   { nombre:'Sacher Mediano',                  precio:530  },
-  'SAGR':   { nombre:'Sacher Grande',                   precio:770  },
-  'SA45':   { nombre:'Sacher Extra 45p',                precio:1175 },
-  'SA60':   { nombre:'Sacher Extra 60p',                precio:1445 },
-  'SA75':   { nombre:'Sacher Extra 75p',                precio:1735 },
-  'SA100':  { nombre:'Sacher Extra 100p',               precio:2295 },
-  'SA150':  { nombre:'Sacher Extra 150p',               precio:3285 },
-  'TIALCH': { nombre:'Tirolés Almendra Chico',          precio:440  },
-  'TIALME': { nombre:'Tirolés Almendra Mediano',        precio:565  },
-  'TIALGR': { nombre:'Tirolés Almendra Grande',         precio:910  },
-  'TIAL45': { nombre:'Tirolés Almendra Extra 45p',      precio:1345 },
-  'TIDUCH': { nombre:'Tirolés Durazno Chico',           precio:440  },
-  'TIDUME': { nombre:'Tirolés Durazno Mediano',         precio:565  },
-  'TIDUGR': { nombre:'Tirolés Durazno Grande',          precio:910  },
-  'TIFRCH': { nombre:'Tirolés Fresa Chico',             precio:475  },
-  'TIFRME': { nombre:'Tirolés Fresa Mediano',           precio:585  },
-  'TIFRGR': { nombre:'Tirolés Fresa Grande',            precio:925  },
-  'TIFR45': { nombre:'Tirolés Fresa Extra 45p',         precio:1445 },
-  'VIECH':  { nombre:'Vienés Chico',                    precio:440  },
-  'VIEME':  { nombre:'Vienés Mediano',                  precio:565  },
-  'VIEGR':  { nombre:'Vienés Grande',                   precio:910  },
-  'VIE45':  { nombre:'Vienés Extra 45p',                precio:1345 },
-  'STME':   { nombre:'Strudell de Manzana Mediano',     precio:625  },
-  'ENME':   { nombre:'Ensoletado Mediano',              precio:365  },
-  'ENGR':   { nombre:'Ensoletado Grande',               precio:540  },
-  'BROW':   { nombre:'Brownie',                         precio:55   },
-  'FRAI':   { nombre:'Fraisse Glassé',                  precio:900  },
-  'TIRA':   { nombre:'Tiramisú',                        precio:515  },
-  'NATI':   { nombre:'Natilla',                         precio:40   },
-  'NUCH':   { nombre:'Nube de Chocolate Chico',         precio:485  },
-  'NUGR':   { nombre:'Nube de Chocolate Grande',        precio:985  },
-  'PIRED':  { nombre:'Pastel Individual Redondo',       precio:90   },
-  'PILI':   { nombre:'Pie de Limón',                    precio:240  },
-  'PINE':   { nombre:'Pie de Nuez',                     precio:330  },
-  'PIQUE':  { nombre:'Pie de Queso',                    precio:365  },
-  'PIQUF':  { nombre:'Pie de Queso con Fresa',          precio:425  },
-  'PIQUZ':  { nombre:'Pie de Queso con Zarzamora',      precio:425  },
-  'BANO':   { nombre:'Banoffee',                        precio:240  },
-  'TAVACH': { nombre:'Tarta Vancouver Chico',           precio:240  },
-  'TAVAME': { nombre:'Tarta Vancouver Mediano',         precio:450  },
-  'TAVAGR': { nombre:'Tarta Vancouver Grande',          precio:680  },
-  'RODA':   { nombre:'Rosca de Dátil',                  precio:520  },
-  'ROES':   { nombre:'Rosca Española',                  precio:365  },
-  'ZUFRU':  { nombre:'Zurich Fruta',                    precio:495  },
-  'GALL':   { nombre:'Galleta (pieza)',                  precio:50   },
-  'MANT':   { nombre:'Mantecada',                       precio:145  },
-  'GELA':   { nombre:'Gelatina',                        precio:270  },
-  'GELAI':  { nombre:'Gelatina Individual',             precio:40   },
-  'BOLME':  { nombre:'Bolsa Merenguitos',               precio:40   },
-  'MACA':   { nombre:'Macaron (caja 6)',                 precio:200  },
-  'PALE':   { nombre:'Paleta',                          precio:45   },
-  'ENJA':   { nombre:'Enjambre (caja 6)',                precio:90   },
+  'ESFRCH':{nombre:'Espuma de Fresa Chico',precio:475},'ESFRME':{nombre:'Espuma de Fresa Mediano',precio:585},
+  'ESFRGR':{nombre:'Espuma de Fresa Grande',precio:925},'ESFR45':{nombre:'Espuma de Fresa Extra 45p',precio:1640},
+  'ESDUCH':{nombre:'Espuma de Durazno Chico',precio:450},'ESDUME':{nombre:'Espuma de Durazno Mediano',precio:575},
+  'ESDUGR':{nombre:'Espuma de Durazno Grande',precio:900},'ESDU45':{nombre:'Espuma de Durazno Extra 45p',precio:1580},
+  'ESMACH':{nombre:'Espuma de Mango Chico',precio:450},'ESMAME':{nombre:'Espuma de Mango Mediano',precio:575},
+  'ESMAGR':{nombre:'Espuma de Mango Grande',precio:900},'ESMA45':{nombre:'Espuma de Mango Extra 45p',precio:1580},
+  'ESIN':{nombre:'Espuma Individual',precio:75},
+  'BERCH':{nombre:'Berlinés Chico',precio:345},'BERME':{nombre:'Berlinés Mediano',precio:495},
+  'BERGR':{nombre:'Berlinés Grande',precio:770},'BER45':{nombre:'Berlinés Extra 45p',precio:1115},
+  'BER60':{nombre:'Berlinés Extra 60p',precio:1345},'BER75':{nombre:'Berlinés Extra 75p',precio:1630},
+  'BER100':{nombre:'Berlinés Extra 100p',precio:2240},'BER150':{nombre:'Berlinés Extra 150p',precio:3285},
+  'CACH':{nombre:'Catalán de Yema Chico',precio:440},'CAME':{nombre:'Catalán de Yema Mediano',precio:565},
+  'CAGR':{nombre:'Catalán de Yema Grande',precio:910},'CA45':{nombre:'Catalán de Yema Extra 45p',precio:1345},
+  'CA60':{nombre:'Catalán de Yema Extra 60p',precio:1595},'CA75':{nombre:'Catalán de Yema Extra 75p',precio:1960},
+  'CA100':{nombre:'Catalán de Yema Extra 100p',precio:2520},'CA150':{nombre:'Catalán de Yema Extra 150p',precio:3600},
+  'INCH':{nombre:'Inglés de Chocolate Chico',precio:440},'INME':{nombre:'Inglés de Chocolate Mediano',precio:565},
+  'INGR':{nombre:'Inglés de Chocolate Grande',precio:910},'IN45':{nombre:'Inglés de Chocolate Extra 45p',precio:1345},
+  'IN60':{nombre:'Inglés de Chocolate Extra 60p',precio:1595},'IN75':{nombre:'Inglés de Chocolate Extra 75p',precio:1960},
+  'IN100':{nombre:'Inglés de Chocolate Extra 100p',precio:2520},'IN150':{nombre:'Inglés de Chocolate Extra 150p',precio:3600},
+  'GECH':{nombre:'German de Coco Chico',precio:460},'GEME':{nombre:'German de Coco Mediano',precio:585},
+  'GEGR':{nombre:'German de Coco Grande',precio:965},'GE45':{nombre:'German de Coco Extra 45p',precio:1395},
+  'GE60':{nombre:'German de Coco Extra 60p',precio:1645},'GE75':{nombre:'German de Coco Extra 75p',precio:2010},
+  'GE100':{nombre:'German de Coco Extra 100p',precio:2570},'GE150':{nombre:'German de Coco Extra 150p',precio:3650},
+  'MOCH':{nombre:'Moka Austriaco Chico',precio:460},'MOME':{nombre:'Moka Austriaco Mediano',precio:585},
+  'MOGR':{nombre:'Moka Austriaco Grande',precio:965},'MO45':{nombre:'Moka Austriaco Extra 45p',precio:1395},
+  'MO60':{nombre:'Moka Austriaco Extra 60p',precio:1645},'MO75':{nombre:'Moka Austriaco Extra 75p',precio:2010},
+  'MO100':{nombre:'Moka Austriaco Extra 100p',precio:2570},'MO150':{nombre:'Moka Austriaco Extra 150p',precio:3650},
+  'PICH':{nombre:'Piñón Chico',precio:485},'PIME':{nombre:'Piñón Mediano',precio:605},
+  'PIGR':{nombre:'Piñón Grande',precio:985},'PI45':{nombre:'Piñón Extra 45p',precio:1405},
+  'PI60':{nombre:'Piñón Extra 60p',precio:1665},'PI75':{nombre:'Piñón Extra 75p',precio:2030},
+  'PI100':{nombre:'Piñón Extra 100p',precio:2590},'PI150':{nombre:'Piñón Extra 150p',precio:3670},
+  'ZACH':{nombre:'Queso con Zarzamora Chico',precio:550},'ZAME':{nombre:'Queso con Zarzamora Mediano',precio:765},
+  'ZAGR':{nombre:'Queso con Zarzamora Grande',precio:1105},'ZA45':{nombre:'Queso con Zarzamora Extra 45p',precio:1705},
+  'QFCH':{nombre:'Queso con Fresa Chico',precio:550},'QFME':{nombre:'Queso con Fresa Mediano',precio:765},
+  'QFGR':{nombre:'Queso con Fresa Grande',precio:1105},'QF45':{nombre:'Queso con Fresa Extra 45p',precio:1705},
+  'ZUFR':{nombre:'Zurich Fresa (Mediano)',precio:545},
+  'SACH':{nombre:'Sacher Chico',precio:365},'SAME':{nombre:'Sacher Mediano',precio:530},
+  'SAGR':{nombre:'Sacher Grande',precio:770},'SA45':{nombre:'Sacher Extra 45p',precio:1175},
+  'SA60':{nombre:'Sacher Extra 60p',precio:1445},'SA75':{nombre:'Sacher Extra 75p',precio:1735},
+  'SA100':{nombre:'Sacher Extra 100p',precio:2295},'SA150':{nombre:'Sacher Extra 150p',precio:3285},
+  'TIALCH':{nombre:'Tirolés Almendra Chico',precio:440},'TIALME':{nombre:'Tirolés Almendra Mediano',precio:565},
+  'TIALGR':{nombre:'Tirolés Almendra Grande',precio:910},'TIAL45':{nombre:'Tirolés Almendra Extra 45p',precio:1345},
+  'TIDUCH':{nombre:'Tirolés Durazno Chico',precio:440},'TIDUME':{nombre:'Tirolés Durazno Mediano',precio:565},
+  'TIDUGR':{nombre:'Tirolés Durazno Grande',precio:910},
+  'TIFRCH':{nombre:'Tirolés Fresa Chico',precio:475},'TIFRME':{nombre:'Tirolés Fresa Mediano',precio:585},
+  'TIFRGR':{nombre:'Tirolés Fresa Grande',precio:925},'TIFR45':{nombre:'Tirolés Fresa Extra 45p',precio:1445},
+  'VIECH':{nombre:'Vienés Chico',precio:440},'VIEME':{nombre:'Vienés Mediano',precio:565},
+  'VIEGR':{nombre:'Vienés Grande',precio:910},'VIE45':{nombre:'Vienés Extra 45p',precio:1345},
+  'STME':{nombre:'Strudell de Manzana Mediano',precio:625},
+  'ENME':{nombre:'Ensoletado Mediano',precio:365},'ENGR':{nombre:'Ensoletado Grande',precio:540},
+  'BROW':{nombre:'Brownie',precio:55},'FRAI':{nombre:'Fraisse Glassé',precio:900},
+  'TIRA':{nombre:'Tiramisú',precio:515},'NATI':{nombre:'Natilla',precio:40},
+  'NUCH':{nombre:'Nube de Chocolate Chico',precio:485},'NUGR':{nombre:'Nube de Chocolate Grande',precio:985},
+  'PIRED':{nombre:'Pastel Individual Redondo',precio:90},
+  'PILI':{nombre:'Pie de Limón',precio:240},'PINE':{nombre:'Pie de Nuez',precio:330},
+  'PIQUE':{nombre:'Pie de Queso',precio:365},'PIQUF':{nombre:'Pie de Queso con Fresa',precio:425},
+  'PIQUZ':{nombre:'Pie de Queso con Zarzamora',precio:425},'BANO':{nombre:'Banoffee',precio:240},
+  'TAVACH':{nombre:'Tarta Vancouver Chico',precio:240},'TAVAME':{nombre:'Tarta Vancouver Mediano',precio:450},
+  'TAVAGR':{nombre:'Tarta Vancouver Grande',precio:680},
+  'RODA':{nombre:'Rosca de Dátil',precio:520},'ROES':{nombre:'Rosca Española',precio:365},
+  'ZUFRU':{nombre:'Zurich Fruta',precio:495},'GALL':{nombre:'Galleta (pieza)',precio:50},
+  'MANT':{nombre:'Mantecada',precio:145},'GELA':{nombre:'Gelatina',precio:270},
+  'GELAI':{nombre:'Gelatina Individual',precio:40},'BOLME':{nombre:'Bolsa Merenguitos',precio:40},
+  'MACA':{nombre:'Macaron (caja 6)',precio:200},'PALE':{nombre:'Paleta',precio:45},
+  'ENJA':{nombre:'Enjambre (caja 6)',precio:90},
 };
 
-const CATALOGO_LISTA = Object.entries(CATALOGO)
-  .map(([codigo, v]) => ({ codigo, nombre: v.nombre, precio: v.precio, busqueda: (codigo+' '+v.nombre).toLowerCase() }))
-  .sort((a,b) => a.nombre.localeCompare(b.nombre, 'es'));
+const CATALOGO_LISTA=Object.entries(CATALOGO)
+  .map(([codigo,v])=>({codigo,nombre:v.nombre,precio:v.precio,busqueda:(codigo+' '+v.nombre).toLowerCase()}))
+  .sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
 
-// ── Datos iniciales (sólo se usan la primera vez que se abre) ─────────────────
+// ── DATOS INICIALES ───────────────────────────────────────────────────────────
+// Converted to multi-product format: each pedido now has a `productos` array
 const DATOS_INICIALES = [
-  {id:1,  codigo:'ESFRCH', producto:'Espuma de Fresa Chico',          entregado:false, nombre:'Emma Malajevich',    telefono:'2223594494', hora:'08:00', pago:0,   notas:''},
-  {id:2,  codigo:'ESFRCH', producto:'Espuma de Fresa Chico',          entregado:false, nombre:'Jorge Limón',        telefono:'2225131517', hora:'09:00', pago:475, notas:''},
-  {id:3,  codigo:'ESFRCH', producto:'Espuma de Fresa Chico',          entregado:false, nombre:'Octavio Nodelo',     telefono:'2229540815', hora:'13:00', pago:275, notas:''},
-  {id:4,  codigo:'ESFRCH', producto:'Espuma de Fresa Chico',          entregado:false, nombre:'Gabriela Mtz',       telefono:'2223140831', hora:'14:00', pago:475, notas:'CACH'},
-  {id:5,  codigo:'ESFRME', producto:'Espuma de Fresa Mediano',        entregado:false, nombre:'Rogelio Rojas',      telefono:'2226639291', hora:'08:00', pago:185, notas:'1/2 y 1/2'},
-  {id:6,  codigo:'ESFRME', producto:'Espuma de Fresa Mediano',        entregado:false, nombre:'Angeles Nava',       telefono:'2229543278', hora:'08:00', pago:0,   notas:''},
-  {id:7,  codigo:'ESFRME', producto:'Espuma de Fresa Mediano',        entregado:false, nombre:'Jorge Limón',        telefono:'2225131517', hora:'08:00', pago:585, notas:'ESFRCH'},
-  {id:8,  codigo:'ESFRME', producto:'Espuma de Fresa Mediano',        entregado:false, nombre:'Juan Luis Chargoy',  telefono:'5554535931', hora:'11:00', pago:0,   notas:'PILI'},
-  {id:9,  codigo:'ESFRME', producto:'Espuma de Fresa Mediano',        entregado:false, nombre:'Gabriela Lechuga',   telefono:'2211597022', hora:'14:00', pago:585, notas:''},
-  {id:10, codigo:'ESFRME', producto:'Espuma de Fresa Mediano',        entregado:false, nombre:'Ada Mtz',            telefono:'2222080959', hora:'14:00', pago:0,   notas:''},
-  {id:11, codigo:'ESFRME', producto:'Espuma de Fresa Mediano',        entregado:false, nombre:'Paty Aguilar',       telefono:'2225357884', hora:'13:00', pago:0,   notas:''},
-  {id:12, codigo:'ESFRME', producto:'Espuma de Fresa Mediano',        entregado:false, nombre:'Maru Torres',        telefono:'2464690581', hora:'13:00', pago:585, notas:''},
-  {id:13, codigo:'ESFRME', producto:'Espuma de Fresa Mediano',        entregado:false, nombre:'Margarita Guerrero', telefono:'2221799440', hora:'13:00', pago:585, notas:''},
-  {id:14, codigo:'ESFRME', producto:'Espuma de Fresa Mediano',        entregado:false, nombre:'Monica GMZ',         telefono:'2222385014', hora:'12:00', pago:585, notas:''},
-  {id:15, codigo:'ESFRME', producto:'Espuma de Fresa Mediano',        entregado:false, nombre:'Karla',              telefono:'5531066988', hora:'11:00', pago:0,   notas:'ESMAME'},
-  {id:16, codigo:'ESFRME', producto:'Espuma de Fresa Mediano',        entregado:false, nombre:'Leandro Limón',      telefono:'2223086211', hora:'12:00', pago:335, notas:''},
-  {id:17, codigo:'ESFRME', producto:'Espuma de Fresa Mediano',        entregado:false, nombre:'Fernando Viveros',   telefono:'2222580239', hora:'10:00', pago:0,   notas:''},
-  {id:18, codigo:'ESFRME', producto:'Espuma de Fresa Mediano',        entregado:false, nombre:'Guillermo Garay',    telefono:'2221857498', hora:'13:00', pago:585, notas:''},
-  {id:19, codigo:'ESFRME', producto:'Espuma de Fresa Mediano',        entregado:false, nombre:'Sr. Bojalil',        telefono:'2225720551', hora:'14:00', pago:585, notas:''},
-  {id:20, codigo:'ESMAME', producto:'Espuma de Mango Mediano',        entregado:false, nombre:'Sra. Sabugo',        telefono:'2222621780', hora:'12:00', pago:575, notas:''},
-  {id:21, codigo:'ESMAME', producto:'Espuma de Mango Mediano',        entregado:false, nombre:'Ana María Torres',   telefono:'2223551241', hora:'14:00', pago:575, notas:''},
-  {id:22, codigo:'ESMAME', producto:'Espuma de Mango Mediano',        entregado:false, nombre:'Karla',              telefono:'',           hora:'',      pago:0,   notas:'ESFRME'},
-  {id:23, codigo:'ESFRGR', producto:'Espuma de Fresa Grande',         entregado:false, nombre:'Eduardo Carpintero', telefono:'2224002030', hora:'14:00', pago:0,   notas:''},
-  {id:24, codigo:'ESFRGR', producto:'Espuma de Fresa Grande',         entregado:false, nombre:'Jorge GZLZ',         telefono:'2221345413', hora:'13:00', pago:0,   notas:''},
-  {id:25, codigo:'ESDUME', producto:'Espuma de Durazno Mediano',      entregado:false, nombre:'Fabiola Balderas',   telefono:'2224136499', hora:'10:00', pago:500, notas:''},
-  {id:26, codigo:'ESDUGR', producto:'Espuma de Durazno Grande',       entregado:false, nombre:'Ale Leon',           telefono:'2223272847', hora:'14:00', pago:0,   notas:''},
-  {id:27, codigo:'IN150',  producto:'Inglés de Chocolate Extra 150p', entregado:false, nombre:'N/A',                telefono:'2223244074', hora:'08:00', pago:0,   notas:'Felicidades Mamás'},
-  {id:28, codigo:'TIALCH', producto:'Tirolés Almendra Chico',         entregado:false, nombre:'Marcela Insorsa',    telefono:'7828889818', hora:'11:00', pago:440, notas:''},
-  {id:29, codigo:'CACH',   producto:'Catalán de Yema Chico',          entregado:false, nombre:'Gabriela MTZ',       telefono:'2225546847', hora:'14:00', pago:440, notas:''},
-  {id:30, codigo:'PILI',   producto:'Pie de Limón',                   entregado:false, nombre:'Juan Luis Chargoy',  telefono:'',           hora:'',      pago:0,   notas:''},
-  {id:31, codigo:'RODA',   producto:'Rosca de Dátil',                 entregado:false, nombre:'Michel Segura',      telefono:'2224261546', hora:'13:00', pago:520, notas:''},
-  {id:32, codigo:'ZUFR',   producto:'Zurich Fresa (Mediano)',         entregado:false, nombre:'Patricia Zenteno',   telefono:'2222770167', hora:'13:00', pago:0,   notas:''},
-  {id:33, codigo:'INME',   producto:'Inglés de Chocolate Mediano',    entregado:false, nombre:'Jorge Manuel Conde', telefono:'2224844512', hora:'14:00', pago:565, notas:''},
-  {id:34, codigo:'ZUFR',   producto:'Zurich Fresa (Mediano)',         entregado:false, nombre:'Pablo Quintero',     telefono:'2221640169', hora:'14:00', pago:0,   notas:''},
-  {id:35, codigo:'PIME',   producto:'Piñón Mediano',                  entregado:false, nombre:'Giselle Munive',     telefono:'2222553190', hora:'14:00', pago:565, notas:''},
-  {id:36, codigo:'ROES',   producto:'Rosca Española',                 entregado:false, nombre:'Enrique Muñoz',      telefono:'2225506200', hora:'11:00', pago:365, notas:''},
-  {id:37, codigo:'GEME',   producto:'German de Coco Mediano',         entregado:false, nombre:'Patricia Zenteno',   telefono:'',           hora:'',      pago:0,   notas:'ZUFR (x2)'},
-  {id:38, codigo:'ESIN',   producto:'Espuma Individual',              entregado:false, nombre:'Daniel Zavaleta',    telefono:'2212794479', hora:'13:00', pago:600, notas:'x8 piezas'},
+  {id:1,nombre:'Emma Malajevich',telefono:'2223594494',hora:'08:00',notas:'',entregado:false,productos:[{codigo:'ESFRCH',nombre:'Espuma de Fresa Chico',precio:475}],pago:0},
+  {id:2,nombre:'Jorge Limón',telefono:'2225131517',hora:'09:00',notas:'ESFRME también',entregado:false,productos:[{codigo:'ESFRCH',nombre:'Espuma de Fresa Chico',precio:475},{codigo:'ESFRME',nombre:'Espuma de Fresa Mediano',precio:585}],pago:1060},
+  {id:3,nombre:'Octavio Nodelo',telefono:'2229540815',hora:'13:00',notas:'',entregado:false,productos:[{codigo:'ESFRCH',nombre:'Espuma de Fresa Chico',precio:475}],pago:275},
+  {id:4,nombre:'Gabriela Mtz',telefono:'2223140831',hora:'14:00',notas:'',entregado:false,productos:[{codigo:'ESFRCH',nombre:'Espuma de Fresa Chico',precio:475},{codigo:'CACH',nombre:'Catalán de Yema Chico',precio:440}],pago:915},
+  {id:5,nombre:'Rogelio Rojas',telefono:'2226639291',hora:'08:00',notas:'1/2 y 1/2',entregado:false,productos:[{codigo:'ESFRME',nombre:'Espuma de Fresa Mediano',precio:585}],pago:185},
+  {id:6,nombre:'Angeles Nava',telefono:'2229543278',hora:'08:00',notas:'',entregado:false,productos:[{codigo:'ESFRME',nombre:'Espuma de Fresa Mediano',precio:585}],pago:0},
+  {id:7,nombre:'Juan Luis Chargoy',telefono:'5554535931',hora:'11:00',notas:'',entregado:false,productos:[{codigo:'ESFRME',nombre:'Espuma de Fresa Mediano',precio:585},{codigo:'PILI',nombre:'Pie de Limón',precio:240}],pago:0},
+  {id:8,nombre:'Gabriela Lechuga',telefono:'2211597022',hora:'14:00',notas:'',entregado:false,productos:[{codigo:'ESFRME',nombre:'Espuma de Fresa Mediano',precio:585}],pago:585},
+  {id:9,nombre:'Ada Mtz',telefono:'2222080959',hora:'14:00',notas:'',entregado:false,productos:[{codigo:'ESFRME',nombre:'Espuma de Fresa Mediano',precio:585}],pago:0},
+  {id:10,nombre:'Paty Aguilar',telefono:'2225357884',hora:'13:00',notas:'',entregado:false,productos:[{codigo:'ESFRME',nombre:'Espuma de Fresa Mediano',precio:585}],pago:0},
+  {id:11,nombre:'Maru Torres',telefono:'2464690581',hora:'13:00',notas:'',entregado:false,productos:[{codigo:'ESFRME',nombre:'Espuma de Fresa Mediano',precio:585}],pago:585},
+  {id:12,nombre:'Margarita Guerrero',telefono:'2221799440',hora:'13:00',notas:'',entregado:false,productos:[{codigo:'ESFRME',nombre:'Espuma de Fresa Mediano',precio:585}],pago:585},
+  {id:13,nombre:'Monica GMZ',telefono:'2222385014',hora:'12:00',notas:'',entregado:false,productos:[{codigo:'ESFRME',nombre:'Espuma de Fresa Mediano',precio:585}],pago:585},
+  {id:14,nombre:'Karla',telefono:'5531066988',hora:'11:00',notas:'',entregado:false,productos:[{codigo:'ESFRME',nombre:'Espuma de Fresa Mediano',precio:585},{codigo:'ESMAME',nombre:'Espuma de Mango Mediano',precio:575}],pago:0},
+  {id:15,nombre:'Leandro Limón',telefono:'2223086211',hora:'12:00',notas:'',entregado:false,productos:[{codigo:'ESFRME',nombre:'Espuma de Fresa Mediano',precio:585}],pago:335},
+  {id:16,nombre:'Fernando Viveros',telefono:'2222580239',hora:'10:00',notas:'',entregado:false,productos:[{codigo:'ESFRME',nombre:'Espuma de Fresa Mediano',precio:585}],pago:0},
+  {id:17,nombre:'Guillermo Garay',telefono:'2221857498',hora:'13:00',notas:'',entregado:false,productos:[{codigo:'ESFRME',nombre:'Espuma de Fresa Mediano',precio:585}],pago:585},
+  {id:18,nombre:'Sr. Bojalil',telefono:'2225720551',hora:'14:00',notas:'',entregado:false,productos:[{codigo:'ESFRME',nombre:'Espuma de Fresa Mediano',precio:585}],pago:585},
+  {id:19,nombre:'Sra. Sabugo',telefono:'2222621780',hora:'12:00',notas:'',entregado:false,productos:[{codigo:'ESMAME',nombre:'Espuma de Mango Mediano',precio:575}],pago:575},
+  {id:20,nombre:'Ana María Torres',telefono:'2223551241',hora:'14:00',notas:'',entregado:false,productos:[{codigo:'ESMAME',nombre:'Espuma de Mango Mediano',precio:575}],pago:575},
+  {id:21,nombre:'Eduardo Carpintero',telefono:'2224002030',hora:'14:00',notas:'',entregado:false,productos:[{codigo:'ESFRGR',nombre:'Espuma de Fresa Grande',precio:925}],pago:0},
+  {id:22,nombre:'Jorge GZLZ',telefono:'2221345413',hora:'13:00',notas:'',entregado:false,productos:[{codigo:'ESFRGR',nombre:'Espuma de Fresa Grande',precio:925}],pago:0},
+  {id:23,nombre:'Fabiola Balderas',telefono:'2224136499',hora:'10:00',notas:'',entregado:false,productos:[{codigo:'ESDUME',nombre:'Espuma de Durazno Mediano',precio:575}],pago:500},
+  {id:24,nombre:'Ale Leon',telefono:'2223272847',hora:'14:00',notas:'',entregado:false,productos:[{codigo:'ESDUGR',nombre:'Espuma de Durazno Grande',precio:900}],pago:0},
+  {id:25,nombre:'N/A',telefono:'2223244074',hora:'08:00',notas:'Felicidades Mamás',entregado:false,productos:[{codigo:'IN150',nombre:'Inglés de Chocolate Extra 150p',precio:3600}],pago:0},
+  {id:26,nombre:'Marcela Insorsa',telefono:'7828889818',hora:'11:00',notas:'',entregado:false,productos:[{codigo:'TIALCH',nombre:'Tirolés Almendra Chico',precio:440}],pago:440},
+  {id:27,nombre:'Gabriela MTZ',telefono:'2225546847',hora:'14:00',notas:'',entregado:false,productos:[{codigo:'CACH',nombre:'Catalán de Yema Chico',precio:440}],pago:440},
+  {id:28,nombre:'Michel Segura',telefono:'2224261546',hora:'13:00',notas:'',entregado:false,productos:[{codigo:'RODA',nombre:'Rosca de Dátil',precio:520}],pago:520},
+  {id:29,nombre:'Patricia Zenteno',telefono:'2222770167',hora:'13:00',notas:'',entregado:false,productos:[{codigo:'ZUFR',nombre:'Zurich Fresa (Mediano)',precio:545},{codigo:'GEME',nombre:'German de Coco Mediano',precio:585}],pago:0},
+  {id:30,nombre:'Jorge Manuel Conde',telefono:'2224844512',hora:'14:00',notas:'',entregado:false,productos:[{codigo:'INME',nombre:'Inglés de Chocolate Mediano',precio:565}],pago:565},
+  {id:31,nombre:'Pablo Quintero',telefono:'2221640169',hora:'14:00',notas:'',entregado:false,productos:[{codigo:'ZUFR',nombre:'Zurich Fresa (Mediano)',precio:545}],pago:0},
+  {id:32,nombre:'Giselle Munive',telefono:'2222553190',hora:'14:00',notas:'',entregado:false,productos:[{codigo:'PIME',nombre:'Piñón Mediano',precio:605}],pago:565},
+  {id:33,nombre:'Enrique Muñoz',telefono:'2225506200',hora:'11:00',notas:'',entregado:false,productos:[{codigo:'ROES',nombre:'Rosca Española',precio:365}],pago:365},
+  {id:34,nombre:'Daniel Zavaleta',telefono:'2212794479',hora:'13:00',notas:'x8 piezas',entregado:false,productos:[{codigo:'ESIN',nombre:'Espuma Individual',precio:75}],pago:600},
+  {id:35,nombre:'Humberto Galli',telefono:'2224268183',hora:'12:00',notas:'',entregado:false,productos:[{codigo:'ESFRCH',nombre:'Espuma de Fresa Chico',precio:475}],pago:575},
 ];
 
-// ── AUTOCOMPLETE ──────────────────────────────────────────────────────────────
-let acIndex = -1, acResultados = [];
+// ── AUTOCOMPLETE (shared, keyed by list id) ───────────────────────────────────
+let acStates={};
+function getAcState(listId){ if(!acStates[listId]) acStates[listId]={index:-1,resultados:[]}; return acStates[listId]; }
 
-function getSugeridos(q) {
-  if (!q) return CATALOGO_LISTA.slice(0, 18);
-  const ql = q.toLowerCase();
-  return CATALOGO_LISTA.filter(p => p.busqueda.includes(ql)).slice(0, 18);
+function getSugeridos(q){
+  if(!q) return CATALOGO_LISTA.slice(0,18);
+  const ql=q.toLowerCase();
+  return CATALOGO_LISTA.filter(p=>p.busqueda.includes(ql)).slice(0,18);
 }
 
-window.acInput = function(input) {
-  acIndex = -1;
-  const q    = input.value.trim();
-  acResultados = getSugeridos(q);
-  const list = document.getElementById('ac-list');
-  const hint = document.getElementById('price-hint');
-  const exact= CATALOGO[q.toUpperCase()];
-  if (exact) {
-    hint.textContent = `✓ ${exact.nombre} — $${exact.precio.toLocaleString('es-MX')}`;
-    const pEl = document.getElementById('f-pago');
-    if (!pEl.value) pEl.value = exact.precio;
-  } else { hint.textContent = ''; }
-  if (!acResultados.length) { list.classList.remove('open'); return; }
-  const ql = q.toLowerCase();
-  list.innerHTML = acResultados.map((p, i) => {
-    const raw = p.codigo + '  ' + p.nombre;
-    const hi  = ql ? raw.replace(new RegExp(`(${ql.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'), '<span class="ac-highlight">$1</span>') : raw;
-    const pts = hi.split(/^(\S+)\s{2}(.*)$/);
-    const cH  = pts.length > 1 ? pts[1] : esc(p.codigo);
-    const nH  = pts.length > 1 ? pts[2] : esc(p.nombre);
-    return `<div class="ac-item" data-i="${i}" onmousedown="acSelect(${i})">
+window.acInput=function(input,listId){
+  const state=getAcState(listId); state.index=-1;
+  const q=input.value.trim();
+  state.resultados=getSugeridos(q);
+  const list=document.getElementById(listId);
+  const hintId=listId==='ac-list'?'price-hint':'price-hint-e';
+  const hint=document.getElementById(hintId);
+  const exact=CATALOGO[q.toUpperCase()];
+  hint.textContent=exact?`✓ ${exact.nombre} — $${exact.precio.toLocaleString('es-MX')}`:'';
+  if(!state.resultados.length){list.classList.remove('open');return;}
+  const ql=q.toLowerCase();
+  list.innerHTML=state.resultados.map((p,i)=>{
+    const raw=p.codigo+'  '+p.nombre;
+    const hi=ql?raw.replace(new RegExp(`(${ql.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'),'<span class="ac-highlight">$1</span>'):raw;
+    const pts=hi.split(/^(\S+)\s{2}(.*)$/);
+    const cH=pts.length>1?pts[1]:esc(p.codigo), nH=pts.length>1?pts[2]:esc(p.nombre);
+    return `<div class="ac-item" data-i="${i}" onmousedown="acSelect(${i},'${listId}')">
       <span class="ac-name"><span class="ac-code">${cH}</span> ${nH}</span>
       <span class="ac-price">$${p.precio.toLocaleString('es-MX')}</span>
     </div>`;
@@ -584,85 +541,174 @@ window.acInput = function(input) {
   list.classList.add('open');
 };
 
-window.acSelect = function(i) {
-  const p = acResultados[i]; if (!p) return;
-  document.getElementById('f-producto').value   = p.codigo;
-  document.getElementById('price-hint').textContent = `✓ ${p.nombre} — $${p.precio.toLocaleString('es-MX')}`;
-  const pEl = document.getElementById('f-pago');
-  if (!pEl.value) pEl.value = p.precio;
-  acClose();
+window.acSelect=function(i,listId){
+  const state=getAcState(listId), p=state.resultados[i]; if(!p) return;
+  const inputId=listId==='ac-list'?'f-producto':'e-producto';
+  const hintId=listId==='ac-list'?'price-hint':'price-hint-e';
+  document.getElementById(inputId).value=p.codigo;
+  document.getElementById(hintId).textContent=`✓ ${p.nombre} — $${p.precio.toLocaleString('es-MX')}`;
+  acClose(listId);
 };
 
-window.acClose = function() { document.getElementById('ac-list').classList.remove('open'); acIndex = -1; };
+window.acClose=function(listId){ document.getElementById(listId).classList.remove('open'); getAcState(listId).index=-1; };
 
-window.acKey = function(e) {
-  const list  = document.getElementById('ac-list');
-  const items = list.querySelectorAll('.ac-item');
-  if (!list.classList.contains('open')) return;
-  if      (e.key==='ArrowDown')            { e.preventDefault(); acIndex=Math.min(acIndex+1,items.length-1); acHighlight(items); }
-  else if (e.key==='ArrowUp')             { e.preventDefault(); acIndex=Math.max(acIndex-1,-1);              acHighlight(items); }
-  else if (e.key==='Enter'&&acIndex>=0)  { e.preventDefault(); acSelect(acIndex); }
-  else if (e.key==='Escape')             { acClose(); }
+window.acKey=function(e,listId){
+  const list=document.getElementById(listId), items=list.querySelectorAll('.ac-item'), state=getAcState(listId);
+  if(!list.classList.contains('open')) return;
+  if(e.key==='ArrowDown'){e.preventDefault();state.index=Math.min(state.index+1,items.length-1);acHL(items,state.index);}
+  else if(e.key==='ArrowUp'){e.preventDefault();state.index=Math.max(state.index-1,-1);acHL(items,state.index);}
+  else if(e.key==='Enter'&&state.index>=0){e.preventDefault();acSelect(state.index,listId);}
+  else if(e.key==='Escape'){acClose(listId);}
 };
+function acHL(items,idx){ items.forEach((it,i)=>it.classList.toggle('selected',i===idx)); if(idx>=0) items[idx].scrollIntoView({block:'nearest'}); }
 
-function acHighlight(items) {
-  items.forEach((it,i) => it.classList.toggle('selected', i===acIndex));
-  if (acIndex>=0) items[acIndex].scrollIntoView({block:'nearest'});
+// ── PRODUCTOS EN FORMULARIO ───────────────────────────────────────────────────
+function totalProductos(arr){ return arr.reduce((s,p)=>s+p.precio,0); }
+
+function renderFormProductos(){
+  const el=document.getElementById('f-productos-list');
+  el.innerHTML=formProductos.map((p,i)=>`
+    <div class="producto-row">
+      <div class="producto-row-info">
+        <div class="producto-row-name">${esc(p.nombre)}</div>
+        <div class="producto-row-code">${esc(p.codigo)}</div>
+      </div>
+      <div class="producto-row-price">$${p.precio.toLocaleString('es-MX')}</div>
+      <button class="producto-row-del" onclick="removeFormProducto(${i})">✕</button>
+    </div>`).join('');
+  const tot=totalProductos(formProductos);
+  const row=document.getElementById('f-total-row');
+  if(formProductos.length>0){ row.style.display='flex'; document.getElementById('f-total-val').textContent='$'+tot.toLocaleString('es-MX'); }
+  else { row.style.display='none'; }
 }
+
+window.addProductoToForm=function(){
+  const raw=document.getElementById('f-producto').value.trim();
+  if(!raw) return;
+  const codigo=raw.toUpperCase(), cat=CATALOGO[codigo];
+  const prod={ codigo, nombre:cat?cat.nombre:raw, precio:cat?cat.precio:0 };
+  formProductos.push(prod);
+  document.getElementById('f-producto').value='';
+  document.getElementById('price-hint').textContent='';
+  renderFormProductos();
+};
+
+window.removeFormProducto=function(i){ formProductos.splice(i,1); renderFormProductos(); };
 
 // ── CRUD ──────────────────────────────────────────────────────────────────────
-window.agregarPedido = function() {
-  const raw    = document.getElementById('f-producto').value.trim();
-  const nombre = document.getElementById('f-nombre').value.trim();
-  if (!raw)    { flash('f-producto'); return; }
-  if (!nombre) { flash('f-nombre');   return; }
-  const codigo   = raw.toUpperCase();
-  const cat      = CATALOGO[codigo];
-  const producto = cat ? cat.nombre : raw;
-  const p = { id: nextId++, codigo, producto, nombre,
-    telefono: document.getElementById('f-telefono').value.trim(),
-    hora:     document.getElementById('f-hora').value,
-    pago:     parseFloat(document.getElementById('f-pago').value) || 0,
-    notas:    document.getElementById('f-notas').value.trim(),
-    entregado: false };
-  pedidos.push(p);
-  savePedido(p);
-  ['f-producto','f-nombre','f-telefono','f-hora','f-pago','f-notas'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('price-hint').textContent = '';
+window.agregarPedido=function(){
+  const nombre=document.getElementById('f-nombre').value.trim();
+  if(!nombre){flash('f-nombre');return;}
+  if(formProductos.length===0){flash('f-producto');return;}
+  const p={
+    id:nextId++, nombre,
+    telefono:document.getElementById('f-telefono').value.trim(),
+    hora:document.getElementById('f-hora').value,
+    notas:document.getElementById('f-notas').value.trim(),
+    productos:[...formProductos],
+    pago:totalProductos(formProductos),
+    entregado:false
+  };
+  pedidos.push(p); savePedido(p);
+  ['f-nombre','f-telefono','f-hora','f-notas','f-producto'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('price-hint').textContent='';
+  formProductos=[]; renderFormProductos();
 };
 
-function flash(id) {
-  const el = document.getElementById(id); el.style.borderColor = '#C0392B'; el.focus();
-  setTimeout(() => el.style.borderColor = '', 1500);
-}
+function flash(id){ const el=document.getElementById(id); el.style.borderColor='#C0392B'; el.focus(); setTimeout(()=>el.style.borderColor='',1500); }
 
-window.toggleEntrega = function(id) {
-  const p = pedidos.find(x => x.id===id);
-  if (p) { p.entregado = !p.entregado; savePedido(p); }
-};
+window.toggleEntrega=function(id){ const p=pedidos.find(x=>x.id===id); if(p){p.entregado=!p.entregado; savePedido(p);} };
 
-window.eliminar = function(id) {
-  if (!confirm('¿Eliminar este apartado?')) return;
-  pedidos = pedidos.filter(x => x.id!==id);
-  deletePedido(id);
-};
+window.eliminar=function(id){ if(!confirm('¿Eliminar este apartado?')) return; pedidos=pedidos.filter(x=>x.id!==id); deletePedido(id); };
 
-window.borrarTodo = function() {
+window.borrarTodo=function(){
   setSyncStatus('saving');
-  remove(dbRef()).then(() => { setSyncStatus('ok'); pedidos=[]; renderAll(); });
+  remove(dbRef()).then(()=>{setSyncStatus('ok');pedidos=[];renderAll();});
   document.getElementById('modal-borrar').classList.remove('open');
 };
 
-window.setFiltro = function(btn) {
-  filtro = btn.dataset.f;
-  document.querySelectorAll('.filt').forEach(b => b.classList.remove('active'));
+// ── EDICIÓN ───────────────────────────────────────────────────────────────────
+function renderEditProductos(){
+  const el=document.getElementById('e-productos-list');
+  el.innerHTML=editProductos.map((p,i)=>`
+    <div class="producto-row">
+      <div class="producto-row-info">
+        <div class="producto-row-name">${esc(p.nombre)}</div>
+        <div class="producto-row-code">${esc(p.codigo)}</div>
+      </div>
+      <div class="producto-row-price">$${p.precio.toLocaleString('es-MX')}</div>
+      <button class="producto-row-del" onclick="removeEditProducto(${i})">✕</button>
+    </div>`).join('');
+  const tot=totalProductos(editProductos);
+  const row=document.getElementById('e-total-row');
+  if(editProductos.length>0){ row.style.display='flex'; document.getElementById('e-total-val').textContent='$'+tot.toLocaleString('es-MX'); }
+  else { row.style.display='none'; }
+}
+
+window.addProductoToEdit=function(){
+  const raw=document.getElementById('e-producto').value.trim(); if(!raw) return;
+  const codigo=raw.toUpperCase(), cat=CATALOGO[codigo];
+  editProductos.push({codigo,nombre:cat?cat.nombre:raw,precio:cat?cat.precio:0});
+  document.getElementById('e-producto').value='';
+  document.getElementById('price-hint-e').textContent='';
+  renderEditProductos();
+};
+window.removeEditProducto=function(i){ editProductos.splice(i,1); renderEditProductos(); };
+
+window.abrirEditar=function(id){
+  const p=pedidos.find(x=>x.id===id); if(!p) return;
+  editId=id;
+  editProductos=[...(p.productos||[{codigo:p.codigo||'',nombre:p.producto||'',precio:p.pago||0}])];
+  document.getElementById('e-nombre').value=p.nombre||'';
+  document.getElementById('e-telefono').value=p.telefono||'';
+  document.getElementById('e-hora').value=p.hora||'';
+  document.getElementById('e-notas').value=p.notas||'';
+  document.getElementById('e-producto').value='';
+  document.getElementById('price-hint-e').textContent='';
+  renderEditProductos();
+  document.getElementById('modal-editar').classList.add('open');
+};
+
+window.cerrarEditar=function(){ document.getElementById('modal-editar').classList.remove('open'); editId=null; editProductos=[]; };
+
+window.guardarEdicion=function(){
+  const p=pedidos.find(x=>x.id===editId); if(!p) return;
+  const nombre=document.getElementById('e-nombre').value.trim();
+  if(!nombre){flash('e-nombre');return;}
+  if(editProductos.length===0){flash('e-producto');return;}
+  p.nombre=nombre;
+  p.telefono=document.getElementById('e-telefono').value.trim();
+  p.hora=document.getElementById('e-hora').value;
+  p.notas=document.getElementById('e-notas').value.trim();
+  p.productos=[...editProductos];
+  p.pago=totalProductos(editProductos);
+  savePedido(p);
+  cerrarEditar();
+};
+
+// ── SEARCH ────────────────────────────────────────────────────────────────────
+window.onSearch=function(input){
+  busqueda=input.value.toLowerCase();
+  document.getElementById('search-clear').classList.toggle('visible',busqueda.length>0);
+  renderOrders();
+};
+window.clearSearch=function(){
+  document.getElementById('search-input').value='';
+  busqueda='';
+  document.getElementById('search-clear').classList.remove('visible');
+  renderOrders();
+};
+
+window.setFiltro=function(btn){
+  filtro=btn.dataset.f;
+  document.querySelectorAll('.filt').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active'); renderOrders();
 };
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
-function renderAll() { renderStats(); renderOrders(); renderPendientes(); }
+function renderAll(){ renderStats(); renderOrders(); renderPendientes(); }
 
-function renderStats() {
+function renderStats(){
   const total=pedidos.length, entregados=pedidos.filter(p=>p.entregado).length;
   const pend=total-entregados, cobro=pedidos.filter(p=>!p.entregado).reduce((s,p)=>s+p.pago,0);
   document.getElementById('stats-grid').innerHTML=`
@@ -672,45 +718,76 @@ function renderStats() {
     <div class="stat-card"><div class="stat-label">Cobro pendiente</div><div class="stat-val money">$${cobro.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>`;
 }
 
-function renderOrders() {
-  const lista = pedidos.filter(p => filtro==='todos'?true:filtro==='pendientes'?!p.entregado:p.entregado);
-  const sorted = [...lista].sort((a,b) => {
-    if (a.entregado!==b.entregado) return a.entregado?1:-1;
-    if (a.hora&&b.hora) return a.hora.localeCompare(b.hora);
-    if (a.hora) return -1; if (b.hora) return 1;
+function matchesBusqueda(p){
+  if(!busqueda) return true;
+  const prods=(p.productos||[]).map(x=>(x.nombre+' '+x.codigo).toLowerCase()).join(' ');
+  return (p.nombre||'').toLowerCase().includes(busqueda)||
+         (p.telefono||'').includes(busqueda)||
+         prods.includes(busqueda);
+}
+
+function renderOrders(){
+  let lista=pedidos.filter(p=>{
+    const filtroOk=filtro==='todos'?true:filtro==='pendientes'?!p.entregado:p.entregado;
+    return filtroOk && matchesBusqueda(p);
+  });
+  const sorted=[...lista].sort((a,b)=>{
+    if(a.entregado!==b.entregado) return a.entregado?1:-1;
+    if(a.hora&&b.hora) return a.hora.localeCompare(b.hora);
+    if(a.hora) return -1; if(b.hora) return 1;
     return a.id-b.id;
   });
-  const el = document.getElementById('orders-list');
-  if (!sorted.length) { el.innerHTML='<div class="empty">Sin apartados en esta vista</div>'; return; }
-  el.innerHTML = sorted.map(p=>`
+  const el=document.getElementById('orders-list');
+  const lbl=document.getElementById('count-label');
+  lbl.textContent=busqueda?`(${sorted.length} resultado${sorted.length!==1?'s':''})` :'';
+  if(!sorted.length){ el.innerHTML=`<div class="empty">${busqueda?'Sin resultados para "'+esc(busqueda)+'"':'Sin apartados en esta vista'}</div>`; return; }
+  el.innerHTML=sorted.map(p=>{
+    const prods=p.productos||[];
+    const total=totalProductos(prods);
+    const multi=prods.length>1;
+    return `
     <div class="order-card ${p.entregado?'done':''}">
       <button class="chk ${p.entregado?'active':''}" onclick="toggleEntrega(${p.id})" title="${p.entregado?'Marcar pendiente':'Marcar entregado'}">
         <svg width="14" height="14" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
       </button>
       <div class="order-body">
         <div class="order-top">
-          <span class="order-producto">${esc(p.producto)}${p.codigo?`<span class="order-codigo">${esc(p.codigo)}</span>`:''}</span>
+          <span class="order-nombre">👤 ${esc(p.nombre)}</span>
           <div class="tags">
             ${p.hora?`<span class="tag tag-hora">🕐 ${p.hora}</span>`:''}
+            ${multi?`<span class="tag tag-multi">${prods.length} productos</span>`:''}
             ${p.pago>0?`<span class="tag tag-pago">$${p.pago.toLocaleString('es-MX',{minimumFractionDigits:2})} restante</span>`:'<span class="tag tag-pagado">✓ Pagado</span>'}
           </div>
         </div>
         <div class="order-info">
-          <span>👤 ${esc(p.nombre)}</span>
           ${p.telefono?`<span>📞 ${esc(p.telefono)}</span>`:''}
+        </div>
+        <div class="order-productos-list">
+          ${prods.map(pr=>`
+            <div class="order-producto-item">
+              <span class="order-producto-item-name">${esc(pr.nombre)}</span>
+              <span class="order-producto-item-code">${esc(pr.codigo)}</span>
+              <span class="order-producto-item-price">$${pr.precio.toLocaleString('es-MX')}</span>
+            </div>`).join('')}
         </div>
         ${p.notas?`<div class="order-notes">📝 ${esc(p.notas)}</div>`:''}
       </div>
-      <button class="del-btn" onclick="eliminar(${p.id})" title="Eliminar">✕</button>
-    </div>`).join('');
+      <div class="order-actions">
+        <button class="edit-btn" onclick="abrirEditar(${p.id})" title="Editar">✏️</button>
+        <button class="del-btn" onclick="eliminar(${p.id})" title="Eliminar">✕</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function renderPendientes() {
+function renderPendientes(){
   const pend=pedidos.filter(p=>!p.entregado), conteo={};
-  pend.forEach(p=>{const k=p.producto.trim(); conteo[k]=(conteo[k]||0)+1;});
+  pend.forEach(p=>{
+    (p.productos||[]).forEach(pr=>{ const k=pr.nombre.trim(); conteo[k]=(conteo[k]||0)+1; });
+  });
   const el=document.getElementById('pendientes-grid');
   const entries=Object.entries(conteo).sort((a,b)=>b[1]-a[1]);
-  if (!entries.length) { el.innerHTML='<div style="color:#A8A5A0;font-size:14px;padding:4px 0;grid-column:1/-1">🎉 ¡Todo entregado!</div>'; return; }
+  if(!entries.length){el.innerHTML='<div style="color:#A8A5A0;font-size:14px;padding:4px 0;grid-column:1/-1">🎉 ¡Todo entregado!</div>';return;}
   el.innerHTML=entries.map(([prod,n])=>`
     <div class="pchip">
       <div class="pchip-name">${esc(prod)}</div>
@@ -718,21 +795,24 @@ function renderPendientes() {
     </div>`).join('');
 }
 
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-window.exportarCSV = function() {
-  if (!pedidos.length) { alert('No hay apartados.'); return; }
-  const titulo = document.getElementById('titulo-control').value || 'apartados';
-  const cols   = ['Código','Producto','Nombre','Teléfono','Hora','Pago restante','Notas','Entregado'];
-  const rows   = pedidos.map(p=>[p.codigo,p.producto,p.nombre,p.telefono,p.hora,p.pago,p.notas,p.entregado?'Sí':'No']
-    .map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(','));
-  const csv  = [cols.join(','),...rows].join('\n');
-  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
-  const a    = document.createElement('a'); a.href=URL.createObjectURL(blob);
+window.exportarCSV=function(){
+  if(!pedidos.length){alert('No hay apartados.');return;}
+  const titulo=document.getElementById('titulo-control').value||'apartados';
+  const cols=['Nombre','Teléfono','Hora','Productos','Total','Pago restante','Notas','Entregado'];
+  const rows=pedidos.map(p=>{
+    const prods=(p.productos||[]).map(pr=>`${pr.codigo}: ${pr.nombre} $${pr.precio}`).join(' | ');
+    const total=totalProductos(p.productos||[]);
+    return [p.nombre,p.telefono,p.hora,prods,total,p.pago,p.notas,p.entregado?'Sí':'No']
+      .map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',');
+  });
+  const csv=[cols.join(','),...rows].join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download=`apartados_${titulo.replace(/\s+/g,'_')}.csv`; a.click();
 };
 
-// ── Start ─────────────────────────────────────────────────────────────────────
 subscribeToDB();
 </script>
 </body>
